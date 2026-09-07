@@ -1,11 +1,54 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>IT401 Project</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <h1>It works!</h1>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}InfraRisk Analyzer | IT Change-Risk Review{% endblock %}
+
+{% block content %}
+<section class="hero">
+    <div class="hero-copy">
+        <p class="eyebrow">IT operations review</p>
+        <h1>Review infrastructure changes before they become outages.</h1>
+        <p class="lede">InfraRisk Analyzer helps Operators compare proposed IT Changes, spot risk signals, and prepare mitigations before a maintenance window.</p>
+        <a class="button" href="{{ url_for('explore') }}">Review Change Risk <span aria-hidden="true">-&gt;</span></a>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+        <svg viewBox="0 0 320 260">
+            <rect class="hero-panel" x="42" y="34" width="150" height="190" rx="10"/>
+            <rect class="hero-server" x="66" y="62" width="102" height="36" rx="6"/>
+            <rect class="hero-server" x="66" y="112" width="102" height="36" rx="6"/>
+            <rect class="hero-server" x="66" y="162" width="102" height="36" rx="6"/>
+            <path class="hero-warning" d="M215 73 286 198H144Z"/>
+            <path class="hero-warning-mark" d="M215 116v46M215 177h.01"/>
+            <path class="hero-network" d="M168 80h32M168 130h47M168 180h31"/>
+            <circle class="hero-node" cx="205" cy="80" r="5"/>
+            <circle class="hero-node" cx="220" cy="130" r="5"/>
+            <circle class="hero-node" cx="204" cy="180" r="5"/>
+        </svg>
+    </div>
+</section>
+
+<section class="capabilities" aria-label="InfraRisk Analyzer capabilities">
+    <article>
+        <span>01</span>
+        <h2>Risk signals</h2>
+        <p>Surface production impact, security exposure, broad user impact, and missing review details before an IT Change proceeds.</p>
+    </article>
+    <article>
+        <span>02</span>
+        <h2>Rollback readiness</h2>
+        <p>Keep recovery planning visible so Operators can judge whether a change can be reversed if the window goes poorly.</p>
+    </article>
+    <article>
+        <span>03</span>
+        <h2>Review metadata</h2>
+        <p>Compare Change Tickets, owners, Review Status, Approval Records, and Audit Trail events in one scannable board.</p>
+    </article>
+</section>
+
+<section class="risk-summary" aria-labelledby="summary-title">
+    <div>
+        <p class="eyebrow">Sample risk summary</p>
+        <h2 id="summary-title">Firewall change needs security review before the window.</h2>
+    </div>
+    <p>A High Risk firewall allow rule touches the production perimeter and depends on external source IP ranges. Mitigate by limiting scope, enabling rule logging, and confirming Security sign-off before the scheduled window.</p>
+</section>
+{% endblock %}

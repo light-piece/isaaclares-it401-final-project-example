@@ -1,0 +1,170 @@
+[
+  {
+    "title": "Firewall Allow Rule for Vendor Monitoring",
+    "change_type": "Firewall",
+    "risk_level": "High",
+    "affected_system": "Data center edge firewall",
+    "scheduled_window": "2026-09-12 22:00-23:00",
+    "summary": "Allow a vendor monitoring service to reach a restricted management endpoint from two external IP ranges.",
+    "risk_signals": [
+      "Production perimeter change",
+      "External source access",
+      "Security review still pending"
+    ],
+    "mitigation": "Limit the rule to vendor-owned IP ranges, require logging on the rule, and confirm the destination port with Security before the window.",
+    "rollback_plan": "Disable the new rule object and restore the previous firewall policy package if monitoring traffic behaves unexpectedly.",
+    "change_owner": "Network Operations",
+    "change_ticket": "CHG-1042",
+    "review_status": "Needs Review",
+    "approval_records": [
+      { "area": "Network", "status": "Signed Off" },
+      { "area": "Security", "status": "Pending" },
+      { "area": "Systems", "status": "Pending" }
+    ],
+    "audit_trail": [
+      "Change ticket opened with vendor IP ranges.",
+      "Network review confirmed destination interface.",
+      "Security requested logging and port validation."
+    ]
+  },
+  {
+    "title": "DNS Cutover for Student Portal",
+    "change_type": "DNS",
+    "risk_level": "High",
+    "affected_system": "Student portal public DNS",
+    "scheduled_window": "2026-09-14 05:30-06:00",
+    "summary": "Move the student portal hostname to the new load balancer before morning registration traffic begins.",
+    "risk_signals": [
+      "Public hostname change",
+      "Broad user impact",
+      "Rollback depends on DNS propagation"
+    ],
+    "mitigation": "Lower TTL before the window, verify the load balancer health checks, and prepare communications for the help desk.",
+    "rollback_plan": "Restore the previous DNS target and keep both load balancers online until traffic returns to the prior endpoint.",
+    "change_owner": "Web Platform Team",
+    "change_ticket": "CHG-1051",
+    "review_status": "Ready for Window",
+    "approval_records": [
+      { "area": "Network", "status": "Signed Off" },
+      { "area": "App Owner", "status": "Signed Off" },
+      { "area": "Security", "status": "Signed Off" }
+    ],
+    "audit_trail": [
+      "App Owner approved the cutover plan.",
+      "Network confirmed DNS TTL reduction.",
+      "Rollback target validated in staging."
+    ]
+  },
+  {
+    "title": "Privileged Access Update for Admin Group",
+    "change_type": "Access",
+    "risk_level": "High",
+    "affected_system": "Directory services admin group",
+    "scheduled_window": "2026-09-13 18:00-18:30",
+    "summary": "Add two operators to a privileged directory group for after-hours server maintenance.",
+    "risk_signals": [
+      "Privileged access expansion",
+      "Security exposure",
+      "Time-bound access requirement"
+    ],
+    "mitigation": "Use temporary group membership, require manager approval, and verify MFA enrollment before granting access.",
+    "rollback_plan": "Remove the two accounts from the privileged group and confirm access is revoked in the audit view.",
+    "change_owner": "Identity and Access Team",
+    "change_ticket": "CHG-1060",
+    "review_status": "Blocked",
+    "approval_records": [
+      { "area": "Systems", "status": "Signed Off" },
+      { "area": "Security", "status": "Pending" },
+      { "area": "App Owner", "status": "Pending" }
+    ],
+    "audit_trail": [
+      "Systems approved the maintenance need.",
+      "Security blocked the change until MFA evidence is attached.",
+      "Owner asked for an automatic removal time."
+    ]
+  },
+  {
+    "title": "Linux Patch Window for Web Servers",
+    "change_type": "Patching",
+    "risk_level": "Medium",
+    "affected_system": "Production Linux web server pool",
+    "scheduled_window": "2026-09-15 21:00-23:00",
+    "summary": "Apply operating system security updates to the web server pool behind the registration service.",
+    "risk_signals": [
+      "Production server maintenance",
+      "Reboot required",
+      "Load balancer drain needed"
+    ],
+    "mitigation": "Patch one node at a time, drain it from the load balancer, and confirm service health before moving to the next node.",
+    "rollback_plan": "Stop the patch sequence, keep unpatched nodes serving traffic, and restore the patched node from the latest snapshot if needed.",
+    "change_owner": "Systems Team",
+    "change_ticket": "CHG-1067",
+    "review_status": "Ready for Window",
+    "approval_records": [
+      { "area": "Systems", "status": "Signed Off" },
+      { "area": "App Owner", "status": "Signed Off" },
+      { "area": "Security", "status": "Pending" }
+    ],
+    "audit_trail": [
+      "Patch list attached to the change ticket.",
+      "App Owner confirmed acceptable maintenance window.",
+      "Systems verified current snapshots."
+    ]
+  },
+  {
+    "title": "Web App Deployment for Registration Service",
+    "change_type": "Deployment",
+    "risk_level": "Medium",
+    "affected_system": "Registration service application",
+    "scheduled_window": "2026-09-16 20:00-21:00",
+    "summary": "Deploy a new registration service build that updates form validation and error handling.",
+    "risk_signals": [
+      "Student-facing service",
+      "Recent validation changes",
+      "Rollback package available"
+    ],
+    "mitigation": "Deploy during lower traffic, run smoke tests immediately after release, and monitor error rates for the first hour.",
+    "rollback_plan": "Redeploy the previous build artifact and clear the application cache if smoke tests fail.",
+    "change_owner": "DevOps Team",
+    "change_ticket": "CHG-1074",
+    "review_status": "Draft",
+    "approval_records": [
+      { "area": "App Owner", "status": "Pending" },
+      { "area": "Systems", "status": "Pending" },
+      { "area": "Security", "status": "Signed Off" }
+    ],
+    "audit_trail": [
+      "Deployment notes drafted from the release checklist.",
+      "Security confirmed no new privileged permissions.",
+      "App Owner requested final smoke-test steps."
+    ]
+  },
+  {
+    "title": "SSH Hardening Config for Bastion Host",
+    "change_type": "Server Config",
+    "risk_level": "Low",
+    "affected_system": "Administrative bastion host",
+    "scheduled_window": "2026-09-17 19:00-19:30",
+    "summary": "Disable password authentication and keep key-based SSH access for the administrative bastion host.",
+    "risk_signals": [
+      "Administrative access path",
+      "Security hardening change",
+      "Tested on staging bastion"
+    ],
+    "mitigation": "Confirm all required operators have working keys and keep an active console session during the config reload.",
+    "rollback_plan": "Restore the previous SSH daemon configuration from backup and reload the service through the console session.",
+    "change_owner": "Systems Team",
+    "change_ticket": "CHG-1082",
+    "review_status": "Ready for Window",
+    "approval_records": [
+      { "area": "Systems", "status": "Signed Off" },
+      { "area": "Security", "status": "Signed Off" },
+      { "area": "Network", "status": "Signed Off" }
+    ],
+    "audit_trail": [
+      "Staging bastion test completed successfully.",
+      "Operator key inventory checked.",
+      "Console rollback path confirmed."
+    ]
+  }
+]

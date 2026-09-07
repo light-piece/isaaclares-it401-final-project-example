@@ -6,3 +6,15 @@ venv/
 instance/
 .pytest_cache/
 *.egg-info/
+.DS_Store
+**/.DS_Store
+node_modules/
+*.docx
+~$*.docx
+A1.docx
+~$A1.docx
+A1/
+**/a1-submission.html
+**/a1-planning-handoff.md
+**/infrarisk-analyzer-a1-pivot.md
+**/0001-use-static-proposed-change-data-for-a1.md

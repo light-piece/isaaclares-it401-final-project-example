@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Change Review Board | InfraRisk Analyzer{% endblock %}
+
+{% block content %}
+<section class="page-intro">
+    <p class="eyebrow">Change Review Board</p>
+    <h1>Review proposed IT Changes by risk.</h1>
+    <p>Compare fictional infrastructure changes across Risk Level, Change Type, affected systems, review readiness, and recovery planning.</p>
+    <p class="disclosure"><strong>Demonstration data, not a production change-management or approval system.</strong> Risk Levels are manually assigned in sample data and explained by visible Risk Signals.</p>
+</section>
+
+<section class="review-board" aria-labelledby="results-title">
+    <form class="filters" method="get" action="{{ url_for('explore') }}">
+        <div>
+            <label for="risk-level">Risk Level</label>
+            <select id="risk-level" name="risk_level">
+                <option value="">All risk levels</option>
+                {% for level in risk_levels %}
+                <option value="{{ level }}"{% if selected_risk == level %} selected{% endif %}>{{ level }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label for="change-type">Change Type</label>
+            <select id="change-type" name="change_type">
+                <option value="">All change types</option>
+                {% for change_type in change_types %}
+                <option value="{{ change_type }}"{% if selected_change_type == change_type %} selected{% endif %}>{{ change_type }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <button type="submit">Apply filters</button>
+        {% if selected_risk or selected_change_type %}
+        <a class="text-link" href="{{ url_for('explore') }}">Clear filters</a>
+        {% endif %}
+    </form>
+
+    <div class="risk-counts" aria-label="Risk count summary">
+        {% for level, count in risk_counts.items() %}
+        <div class="risk-count risk-{{ level|lower }}">
+            <span>{{ level }}</span>
+            <strong>{{ count }}</strong>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="results-heading">
+        <h2 id="results-title">Proposed IT Changes</h2>
+        <p>{{ changes|length }} IT change{% if changes|length != 1 %}s{% endif %}</p>
+    </div>
+
+    {% if not changes %}
+    <div class="empty-state">
+        <h3>No IT changes match these filters.</h3>
+        <p>Try another combination or <a href="{{ url_for('explore') }}">clear all filters</a> to see every proposed change.</p>
+    </div>
+    {% endif %}
+
+    <div class="change-grid">
+        {% for change in changes %}
+        <article class="change-card risk-{{ change.risk_level|lower }}">
+            <div class="card-topline">
+                <span class="risk-badge">{{ change.risk_level }} Risk</span>
+                <span>{{ change.change_type }}</span>
+            </div>
+            <h3>{{ change.title }}</h3>
+            <p>{{ change.summary }}</p>
+
+            <dl class="metadata-grid">
+                <div><dt>Change ticket</dt><dd>{{ change.change_ticket }}</dd></div>
+                <div><dt>Change owner</dt><dd>{{ change.change_owner }}</dd></div>
+                <div><dt>Affected system</dt><dd>{{ change.affected_system }}</dd></div>
+                <div><dt>Scheduled window</dt><dd>{{ change.scheduled_window }}</dd></div>
+                <div><dt>Review status</dt><dd>{{ change.review_status }}</dd></div>
+            </dl>
+
+            <section class="card-section">
+                <h4>Risk signals</h4>
+                <ul>
+                    {% for signal in change.risk_signals %}
+                    <li>{{ signal }}</li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            <section class="card-section">
+                <h4>Mitigation</h4>
+                <p>{{ change.mitigation }}</p>
+            </section>
+
+            <section class="card-section">
+                <h4>Rollback plan</h4>
+                <p>{{ change.rollback_plan }}</p>
+            </section>
+
+            <section class="card-section">
+                <h4>Approval records</h4>
+                <ul class="approval-list">
+                    {% for approval in change.approval_records %}
+                    <li><span>{{ approval.area }}</span><strong>{{ approval.status }}</strong></li>
+                    {% endfor %}
+                </ul>
+            </section>
+
+            <section class="card-section">
+                <h4>Audit trail</h4>
+                <ol>
+                    {% for event in change.audit_trail %}
+                    <li>{{ event }}</li>
+                    {% endfor %}
+                </ol>
+            </section>
+        </article>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

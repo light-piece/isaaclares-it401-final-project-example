@@ -117,8 +117,3 @@ docs/submission/             A1 PDF hand-in artifact
 
 Assignment 2 should prioritize persistent IT Changes with create and edit workflows. Later work may add stored Risk Findings, Approval Records, Audit Trail events, search and retrieval, external ticket or cloud export ingestion, and AI-generated Risk Summaries.
 
-Project terminology and data decisions are documented in [`CONTEXT.md`](CONTEXT.md), [`docs/adr/0001-use-static-proposed-change-data-for-a1.md`](docs/adr/0001-use-static-proposed-change-data-for-a1.md), and [`docs/adr/0002-select-infrarisk-analyzer.md`](docs/adr/0002-select-infrarisk-analyzer.md).
-
-## Submission artifact
-
-The generated Assignment 1 report is available at [`docs/submission/InfraRisk-Analyzer-A1.pdf`](docs/submission/InfraRisk-Analyzer-A1.pdf).

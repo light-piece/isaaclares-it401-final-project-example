@@ -1,63 +1,115 @@
-# BuzzAware Campus Domain Context
+# InfraRisk Analyzer Domain Context
 
-## Purpose
+InfraRisk Analyzer helps early-career IT operations staff reason about proposed infrastructure changes before they affect production systems. The project focuses on change risk, mitigations, review needs, and rollback readiness rather than automated approval.
 
-BuzzAware Campus helps CSUCI students, faculty, staff, and visitors understand which campus areas have higher reported mosquito activity and choose sensible precautions before visiting them.
+## Language
 
-The Assignment 1 application uses fictional demonstration observations. It is not an official CSUCI, vector-control, medical, or public-health surveillance service.
+**IT Change**:
+A proposed modification to infrastructure, access, network behavior, application deployment, or system configuration.
+_Avoid_: Task, ticket, update
 
-## Ubiquitous Language
+**Change Risk**:
+The chance that an IT Change could disrupt availability, weaken security, break connectivity, or create operational recovery problems.
+_Avoid_: Danger score, severity
 
-### Campus Area
+**Risk Level**:
+A Low, Medium, or High classification that summarizes Change Risk for an IT Change. A Risk Level is a review aid, not an approval decision.
+_Avoid_: Severity, score, priority
 
-A recognizable public place at CSUCI that can appear in the activity explorer. A Campus Area may be an academic building, recreation area, residential area, dining destination, or outdoor gathering space.
+**Risk Finding**:
+A specific concern discovered during review of an IT Change, such as missing rollback steps, broad access impact, or insufficient testing.
+_Avoid_: Alert, issue, warning
 
-Assignment 1 begins with eight Campus Areas: John Spoor Broome Library, Bell Tower, Islands Cafe, Town Center, North Quad, South Quad, Potrero Field, and Santa Cruz Village. The model must remain easy to extend with building-level locations such as Sierra Hall and Gateway Hall.
+**Mitigation**:
+An action that reduces the likelihood or impact of a Risk Finding before the IT Change proceeds.
+_Avoid_: Fix, recommendation, advice
 
-Attributes:
+**Affected System**:
+The service, server, network segment, cloud resource, account group, or application touched by an IT Change.
+_Avoid_: Asset, target, item
 
-- `name`: public CSUCI location name
-- `location_type`: Academic, Recreation, Residential, Dining, or Outdoor
-- `activity_level`: Low, Moderate, or High reported activity
-- `observation_date`: date associated with the sample observation
-- `description`: short explanation of the location and observation
-- `precaution`: practical action a visitor could take
+**Change Owner**:
+The person or team responsible for preparing an IT Change and coordinating its review.
+_Avoid_: Assignee, requester, user
 
-### Reported Activity
+**Change Ticket**:
+The tracking identifier for an IT Change in a service desk, issue tracker, or change-management workflow.
+_Avoid_: Case, issue, task
 
-A qualitative classification of mosquito observations associated with a Campus Area. The allowed values are Low, Moderate, and High. It describes demonstration mosquito activity, not disease risk.
+**Change Type**:
+A category that describes the kind of IT Change being reviewed. Assignment 1 uses Firewall, DNS, Access, Patching, Deployment, and Server Config.
+_Avoid_: Category, label
 
-### Activity Explorer
+**Review Status**:
+The current review state of an IT Change. Assignment 1 uses Draft, Needs Review, Ready for Window, and Blocked.
+_Avoid_: Approval, progress, state
 
-The `/explore` page that reads Campus Areas from JSON, displays higher activity first, and lets users filter by activity level and location type. An empty result explains that no areas match and offers to clear the filters.
+**Approval Record**:
+A note that a required human review area, such as Network, Security, Systems, or App Owner, has a Pending or Signed Off status for an IT Change. An Approval Record is displayed as metadata; InfraRisk Analyzer does not grant approval authority.
+_Avoid_: App approval, decision, permission
 
-### Guide Card
+**Audit Trail**:
+A short chronological record of important review events for an IT Change. Assignment 1 displays two or three concise events per change.
+_Avoid_: History, log, activity feed
 
-A short educational item displayed with the Activity Explorer. Assignment 1 covers mosquito identification, bite prevention, and reducing breeding sites using authoritative public-health sources.
+**Risk Signal**:
+A condition that contributes to Change Risk, such as production impact, security exposure, missing rollback steps, or broad user impact.
+_Avoid_: Factor, trigger, flag
 
-### Community Sighting Report
+**Scheduled Window**:
+The planned time period when an IT Change is expected to be performed.
+_Avoid_: Date, deadline, maintenance time
 
-A future user-submitted observation about mosquito activity at a Campus Area. Reports are not part of Assignment 1. A later version will persist and validate or moderate them before treating them as trustworthy observations.
+**Rollback Plan**:
+The documented steps for restoring the prior working state if an IT Change causes unacceptable impact.
+_Avoid_: Backup plan, undo steps
+
+**Risk Summary**:
+A plain-English explanation of the most important Change Risk, Risk Signals, and mitigations for an IT Change.
+_Avoid_: AI answer, generated text, description
+
+**Operator**:
+The junior sysadmin, network-ops practitioner, or DevOps learner preparing or reviewing an IT Change.
+_Avoid_: User, admin, engineer
+
+**Change-Risk Review**:
+The structured evaluation of an IT Change to identify Change Risk, required mitigations, review needs, and rollback readiness.
+_Avoid_: Approval, audit, scan
+
+**External Intelligence**:
+Current, source-attributed information acquired from an external web source that informs a Change-Risk Review. It is distinct from the Operator's reviewed Risk Level.
+_Avoid_: Live verdict, automated decision, real-time guarantee
+
+**External Intelligence Snapshot**:
+The timestamped External Intelligence retained with an IT Change to show the evidence available when its Change-Risk Review occurred.
+_Avoid_: Current state, live record
+
+**CVE Identifier**:
+The standardized identifier for a publicly disclosed cybersecurity vulnerability, used by an Operator to request relevant External Intelligence.
+_Avoid_: Vulnerability number, security ticket
+
+**Known Exploited Vulnerability**:
+A vulnerability that a trusted source identifies as exploited in the wild. It is evidence that can elevate Change Risk; it is not an automatic decision about an IT Change.
+_Avoid_: Confirmed breach, automatic block
+
+**Change Review Board**:
+The workspace where an Operator compares proposed IT Changes, filters them by Risk Level and Change Type, and reviews mitigations before escalation.
+_Avoid_: Dashboard, explore page, approval board
 
 ## Product Language
 
-- Application name: **BuzzAware Campus**
-- Tagline: **Know where mosquitoes are active before you go.**
-- Primary action: **Explore Activity**
-- Disclosure: **Demonstration data—not official CSUCI or public-health surveillance.**
-
-## Future Direction
-
-Assignment 2 should prioritize persistent community sighting reports. Later work may add external weather or vector-control information, search, additional buildings, and map-based decision support.
-
-## Information Sources
-
-- [CSUCI campus map](https://maps.csuci.edu/?id=502)
-- [CSUCI outdoor spaces](https://www.csuci.edu/office-departments/university-events/locations/athletic-outdoor-spaces.html)
-- [CSUCI recreation fields](https://www.csuci.edu/student-life/recreation/rec-fields.html)
-- [CSUCI housing](https://www.csuci.edu/student-life/housing/index.html)
-- [CSUCI Sierra Hall](https://www.csuci.edu/fs/pdc/sierra-hall.htm)
-- [CSUCI Gateway Hall opening](https://www.csuci.edu/news/releases/gateway-hall-opening-20250822.htm)
-- [CDC mosquito overview](https://www.cdc.gov/mosquitoes/about/index.html)
-- [CDC mosquito-bite prevention](https://www.cdc.gov/mosquitoes/prevention/index.html)
-- [CDC mosquito control at home](https://www.cdc.gov/mosquitoes/mosquito-control/mosquito-control-at-home.html)
+- Application name: **InfraRisk Analyzer**
+- Tagline: **Review infrastructure changes before they become outages.**
+- Product direction: **IT change-risk analysis for infrastructure operations**
+- Primary audience: **junior sysadmin and network-ops practitioners**
+- Primary action: **Review Change Risk**
+- Assignment 1 route: **`/explore`, presented as the Change Review Board**
+- Assignment 1 data: **six fictional IT Changes: firewall allow rule, DNS cutover, privileged access update, Linux patch window, web app deployment, and SSH hardening config**
+- Assignment 1 sorting: **High Risk first, then Medium, then Low**
+- Assignment 1 risk method: **Risk Levels are manually assigned in sample data and explained by visible Risk Signals.**
+- Assignment 1 homepage: **hero pitch, three capability panels, and a compact sample Risk Summary**
+- Assignment 1 board layout: **filter bar, risk count summary, and dense IT Change cards with review metadata**
+- Future intelligence direction: **AI-generated Risk Summaries that identify Risk Signals, missing review items, mitigation gaps, and rollback concerns**
+- Future persistence direction: **stored IT Changes, Risk Findings, Approval Records, and Audit Trail events**
+- Assignment 1 disclosure: **Demonstration data, not a production change-management or approval system.**
+- Decision boundary: **The application identifies risks and mitigations; it does not approve production changes.**

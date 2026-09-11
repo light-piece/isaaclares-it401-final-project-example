@@ -77,7 +77,7 @@ http://127.0.0.1:5000/explore?risk_level=High&change_type=Firewall
 ## Test
 
 ```bash
-python -m pytest -q
+python3 -m pytest -q
 ```
 
 The tests exercise the application through its public HTTP interface. They do not require network access or external credentials.
@@ -115,10 +115,10 @@ docs/submission/             A1 PDF hand-in artifact
 
 ## Future work
 
-Assignment 2 should prioritize persistent IT Changes with create and edit workflows. Later work may add stored Risk Findings, Approval Records, Audit Trail events, search and retrieval, external ticket or cloud export ingestion, and AI-generated Risk Summaries.
+Assignment 2 will add an External Intelligence workflow: an Operator enters a CVE Identifier, InfraRisk retrieves NVD vulnerability details, and the application compares them with CISA Known Exploited Vulnerabilities catalog evidence. Assignment 3 can retain timestamped External Intelligence Snapshots with persistent IT Changes, Risk Findings, Approval Records, and Audit Trail events.
 
-Project terminology and data decisions are documented in [`CONTEXT.md`](CONTEXT.md), [`docs/adr/0001-use-static-proposed-change-data-for-a1.md`](docs/adr/0001-use-static-proposed-change-data-for-a1.md), and [`docs/adr/0002-select-infrarisk-analyzer.md`](docs/adr/0002-select-infrarisk-analyzer.md).
+Project terminology and data decisions are documented in [`CONTEXT.md`](CONTEXT.md), [`docs/adr/0002-select-infrarisk-analyzer.md`](docs/adr/0002-select-infrarisk-analyzer.md), and [`docs/adr/0003-use-nvd-and-cisa-kev-for-a2-external-intelligence.md`](docs/adr/0003-use-nvd-and-cisa-kev-for-a2-external-intelligence.md).
 
 ## Submission artifact
 
-The generated Assignment 1 report is available at [`docs/submission/InfraRisk-Analyzer-A1.pdf`](docs/submission/InfraRisk-Analyzer-A1.pdf).
+The versioned Assignment 1 report is available at [`docs/submission/InfraRisk-Analyzer-A1.pdf`](docs/submission/InfraRisk-Analyzer-A1.pdf). It is generated from the local HTML submission source before release.

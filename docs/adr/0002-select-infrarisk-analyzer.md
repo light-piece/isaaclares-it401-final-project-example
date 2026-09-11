@@ -1,0 +1,3 @@
+# Select InfraRisk Analyzer as the Semester Project Direction
+
+InfraRisk Analyzer was selected as the semester project direction because it showcases IT operations judgment for DevOps, system administration, systems engineering, network engineering, and cybersecurity-adjacent roles. We considered cloud security posture, IT change-risk analysis, and career intelligence; change-risk analysis was selected because it demonstrates operational decision-making, fits the Assignment 1 Flask and JSON requirements, and can grow into later web-intelligence features without depending on unreliable job-site scraping or competing directly with mature cloud-security products.

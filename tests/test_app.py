@@ -20,6 +20,9 @@ def test_homepage_introduces_infrarisk_analyzer(client):
     assert b"Review Change Risk" in response.data
     assert b"Risk signals" in response.data
     assert b"Rollback readiness" in response.data
+    assert b"Review metadata" in response.data
+    assert b"Sample risk summary" in response.data
+    assert b"Firewall change needs security review before the window." in response.data
     assert b"Isaac Lares" in response.data
 
 
@@ -53,6 +56,28 @@ def test_change_review_board_combines_risk_level_and_change_type_filters(client)
     assert b"Linux Patch Window for Web Servers" not in response.data
     assert b'<option value="High" selected>' in response.data
     assert b'<option value="Firewall" selected>' in response.data
+
+
+def test_change_review_board_filters_by_risk_level(client):
+    response = client.get("/explore?risk_level=High")
+
+    assert response.status_code == 200
+    assert b"3 IT changes" in response.data
+    assert b"Firewall Allow Rule for Vendor Monitoring" in response.data
+    assert b"DNS Cutover for Student Portal" in response.data
+    assert b"Privileged Access Update for Admin Group" in response.data
+    assert b"Linux Patch Window for Web Servers" not in response.data
+    assert b'<option value="High" selected>' in response.data
+
+
+def test_change_review_board_filters_by_change_type(client):
+    response = client.get("/explore?change_type=Patching")
+
+    assert response.status_code == 200
+    assert b"1 IT change" in response.data
+    assert b"Linux Patch Window for Web Servers" in response.data
+    assert b"Firewall Allow Rule for Vendor Monitoring" not in response.data
+    assert b'<option value="Patching" selected>' in response.data
 
 
 @pytest.mark.parametrize(

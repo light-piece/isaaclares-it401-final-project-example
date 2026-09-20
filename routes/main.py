@@ -51,3 +51,42 @@ def register_routes(app):
             selected_change_type=selected_change_type,
             risk_counts=risk_counts,
         )
+
+    @app.route("/prototype/external-intelligence")
+    def external_intelligence_prototype():
+        """THROWAWAY UI PROTOTYPE: three External Intelligence Review layouts."""
+        if not app.config.get("DEBUG", False):
+            abort(404)
+
+        variants = {
+            "A": "Evidence ledger",
+            "B": "Decision desk",
+            "C": "Review brief",
+        }
+        variant = request.args.get("variant", "A").upper()
+        if variant not in variants:
+            abort(400, description="Unknown prototype variant.")
+
+        prototype_review = {
+            "change_ticket": "CHG-1042",
+            "change_title": "Firewall Allow Rule for Vendor Monitoring",
+            "affected_system": "Campus perimeter firewall",
+            "risk_level": "High",
+            "cve": "CVE-2024-3400",
+            "description": "An OS command injection vulnerability in PAN-OS software.",
+            "published": "2024-04-12",
+            "cvss": "10.0 Critical",
+            "kev_status": "Listed in CISA KEV",
+            "vendor": "Palo Alto Networks",
+            "product": "PAN-OS",
+            "date_added": "2024-04-12",
+            "due_date": "2024-04-19",
+            "required_action": "Apply mitigations per vendor instructions or discontinue use.",
+            "retrieved_at": "Prototype sample — request-time evidence",
+        }
+        return render_template(
+            "external_intelligence_prototype.html",
+            variant=variant,
+            variant_name=variants[variant],
+            review=prototype_review,
+        )

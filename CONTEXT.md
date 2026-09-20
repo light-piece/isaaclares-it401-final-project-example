@@ -84,6 +84,10 @@ _Avoid_: Live verdict, automated decision, real-time guarantee
 The timestamped External Intelligence retained with an IT Change to show the evidence available when its Change-Risk Review occurred.
 _Avoid_: Current state, live record
 
+**External Intelligence Review**:
+A CVE-focused Change-Risk Review that relates source-attributed External Intelligence to one selected IT Change. It informs review without changing the IT Change's manually assigned Risk Level.
+_Avoid_: Vulnerability scan, automated verdict
+
 **CVE Identifier**:
 The standardized identifier for a publicly disclosed cybersecurity vulnerability, used by an Operator to request relevant External Intelligence.
 _Avoid_: Vulnerability number, security ticket

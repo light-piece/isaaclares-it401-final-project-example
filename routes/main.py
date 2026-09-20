@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 from flask import abort, render_template, request
 
@@ -52,41 +53,43 @@ def register_routes(app):
             risk_counts=risk_counts,
         )
 
-    @app.route("/prototype/external-intelligence")
-    def external_intelligence_prototype():
-        """THROWAWAY UI PROTOTYPE: three External Intelligence Review layouts."""
-        if not app.config.get("DEBUG", False):
-            abort(404)
+    @app.route("/intelligence")
+    def external_intelligence_review():
+        data_path = os.path.join(app.config["DATA_DIR"], "it_changes.json")
+        with open(data_path, encoding="utf-8") as data_file:
+            changes = [ITChange.from_dict(item) for item in json.load(data_file)]
 
-        variants = {
-            "A": "Evidence ledger",
-            "B": "Decision desk",
-            "C": "Review brief",
-        }
-        variant = request.args.get("variant", "A").upper()
-        if variant not in variants:
-            abort(400, description="Unknown prototype variant.")
+        change_ticket = request.args.get("change_ticket", "")
+        cve = request.args.get("cve", "").strip().upper()
+        review_submitted = "change_ticket" in request.args or "cve" in request.args
 
-        prototype_review = {
-            "change_ticket": "CHG-1042",
-            "change_title": "Firewall Allow Rule for Vendor Monitoring",
-            "affected_system": "Campus perimeter firewall",
-            "risk_level": "High",
-            "cve": "CVE-2024-3400",
-            "description": "An OS command injection vulnerability in PAN-OS software.",
-            "published": "2024-04-12",
-            "cvss": "10.0 Critical",
-            "kev_status": "Listed in CISA KEV",
-            "vendor": "Palo Alto Networks",
-            "product": "PAN-OS",
-            "date_added": "2024-04-12",
-            "due_date": "2024-04-19",
-            "required_action": "Apply mitigations per vendor instructions or discontinue use.",
-            "retrieved_at": "Prototype sample — request-time evidence",
-        }
+        if review_submitted and not re.fullmatch(r"CVE-\d{4}-\d{4,7}", cve):
+            return (
+                render_template(
+                    "external_intelligence_error.html",
+                    heading="Check the CVE Identifier",
+                    message="Use a value like CVE-2024-3400.",
+                ),
+                400,
+            )
+
+        selected_change = next(
+            (change for change in changes if change.change_ticket == change_ticket),
+            None,
+        )
+        if review_submitted and selected_change is None:
+            return (
+                render_template(
+                    "external_intelligence_error.html",
+                    heading="IT Change not found",
+                    message="Choose an IT Change from the locally stored list.",
+                ),
+                404,
+            )
+
         return render_template(
-            "external_intelligence_prototype.html",
-            variant=variant,
-            variant_name=variants[variant],
-            review=prototype_review,
+            "external_intelligence.html",
+            changes=changes,
+            selected_change=selected_change,
+            cve=cve,
         )

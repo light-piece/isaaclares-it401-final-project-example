@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+
+{% block title %}External Intelligence Review | InfraRisk Analyzer{% endblock %}
+
+{% block content %}
+<header class="page-intro intelligence-intro">
+    <p class="eyebrow">External Intelligence Review</p>
+    <h1>Relate current vulnerability evidence to an IT Change.</h1>
+    <p>Select an IT Change and enter a CVE Identifier. Your selection will be validated before external evidence is acquired.</p>
+</header>
+
+<section class="intelligence-workspace" aria-labelledby="review-form-title">
+    <form class="intelligence-form" action="{{ url_for('external_intelligence_review') }}" method="get">
+        <div>
+            <p class="eyebrow">Start a review</p>
+            <h2 id="review-form-title">Choose the local change context</h2>
+        </div>
+        <label for="change-ticket">IT Change</label>
+        <select id="change-ticket" name="change_ticket" required>
+            <option value="">Select an IT Change</option>
+            {% for change in changes %}
+            <option value="{{ change.change_ticket }}"{% if selected_change and selected_change.change_ticket == change.change_ticket %} selected{% endif %}>{{ change.change_ticket }} — {{ change.title }}</option>
+            {% endfor %}
+        </select>
+
+        <label for="cve">CVE Identifier</label>
+        <input id="cve" name="cve" type="text" value="{{ cve }}" placeholder="CVE-2024-3400" autocomplete="off" required>
+
+        <button type="submit">Prepare External Intelligence Review</button>
+    </form>
+
+    {% if selected_change %}
+    <article class="intelligence-context" aria-labelledby="selected-change-title">
+        <p class="eyebrow">Selected IT Change</p>
+        <p class="context-ticket">{{ selected_change.change_ticket }} · {{ cve }}</p>
+        <h2 id="selected-change-title">{{ selected_change.title }}</h2>
+        <dl>
+            <div><dt>Change Type</dt><dd>{{ selected_change.change_type }}</dd></div>
+            <div><dt>Affected System</dt><dd>{{ selected_change.affected_system }}</dd></div>
+            <div><dt>Manually assigned Risk Level</dt><dd>{{ selected_change.risk_level }}</dd></div>
+        </dl>
+        <p class="source-pending">Source evidence has not been acquired yet.</p>
+    </article>
+    {% else %}
+    <aside class="intelligence-empty-state">
+        <p class="eyebrow">Ready for source evidence</p>
+        <h2>Select an IT Change and enter a CVE Identifier</h2>
+        <p>No external request is made until both values pass validation.</p>
+    </aside>
+    {% endif %}
+</section>
+{% endblock %}

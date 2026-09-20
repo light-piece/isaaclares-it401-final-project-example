@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}{{ heading }} | InfraRisk Analyzer{% endblock %}
+
+{% block content %}
+<section class="review-error" role="alert">
+    <p class="eyebrow">External Intelligence Review</p>
+    <h1>{{ heading }}</h1>
+    <p>{{ message }}</p>
+    <a class="button" href="{{ url_for('external_intelligence_review') }}">Return to the review form</a>
+</section>
+{% endblock %}

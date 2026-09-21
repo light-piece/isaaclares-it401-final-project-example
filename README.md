@@ -127,17 +127,17 @@ The screenshots are checked-in browser captures from the application. The extern
 
 ### Homepage
 
-![InfraRisk Analyzer homepage](docs/screenshots/home-desktop.png)
+![InfraRisk Analyzer homepage](docs/screenshots/home-a2-final.png)
 
 ### Combined guided review, NVD evidence, and scraped CISA evidence
 
-![External Intelligence Review with guided interpretation, NVD API evidence, and CISA KEV scraped evidence](docs/screenshots/external-intelligence-desktop.png)
+![External Intelligence Review with guided interpretation, NVD API evidence, and CISA KEV scraped evidence](docs/screenshots/external-intelligence-discovery-final.png)
 
 The combined capture is labeled in-page: the “Guided interpretation” panel demonstrates the integrated review, “NVD API evidence” demonstrates the JSON source, and “CISA KEV catalog evidence” demonstrates the scraped webpage source.
 
 ### Change Review Board
 
-![Filtered Change Review Board](docs/screenshots/explore-desktop.png)
+![Filtered Change Review Board](docs/screenshots/explore-a2-final.png)
 
 ## Future Work
 

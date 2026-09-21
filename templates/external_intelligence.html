@@ -87,9 +87,16 @@
         </dl>
         <p class="source-pending"><strong>Strong Risk Signal:</strong> CISA identifies this CVE as known exploited. Verify that the selected Affected System uses the affected product and version. This evidence is not proof that the system is vulnerable and does not automatically approve or block the IT Change.</p>
         {% else %}
+        {% if not cisa_available %}
+        <h2 id="kev-evidence-title">CISA KEV evidence unavailable</h2>
+        <p class="source-pending">{{ cisa_error }}</p>
+        <p>Only NVD evidence was acquired successfully. The application cannot claim that {{ cve }} is listed or not listed in the CISA KEV catalog until CISA is available.</p>
+        <p>Source: <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog">CISA Known Exploited Vulnerabilities catalog</a>.</p>
+        {% else %}
         <h2 id="kev-evidence-title">{{ cve }} is not listed in the CISA KEV catalog</h2>
         <p class="source-pending">CISA returned no exact CVE match. This does not mean the vulnerability is safe or that the selected Affected System is unaffected. Verify the affected product and version directly.</p>
         <p>Source: <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog">CISA Known Exploited Vulnerabilities catalog</a>. The catalog was queried at request time.</p>
+        {% endif %}
         {% endif %}
     </article>
 </section>

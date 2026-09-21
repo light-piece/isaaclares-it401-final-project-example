@@ -1,6 +1,16 @@
 from unittest.mock import Mock, patch
 
-from services.cisa_kev_service import CisaKevService
+import pytest
+import requests
+
+from services.cisa_kev_service import CisaKevService, CisaKevSourceError
+
+
+@pytest.fixture(autouse=True)
+def clear_cisa_cache():
+    CisaKevService._cache.clear()
+    yield
+    CisaKevService._cache.clear()
 
 
 CATALOG_HTML = """
@@ -48,3 +58,44 @@ def test_cisa_service_returns_no_match_for_irrelevant_html_results():
 
     with patch("services.cisa_kev_service.requests.get", return_value=response):
         assert CisaKevService().get_cve("CVE-2024-3400") is None
+
+
+def test_cisa_service_reuses_and_expires_cached_outcome_without_sleeping():
+    now = [100.0]
+    response = Mock(status_code=200, text=CATALOG_HTML)
+    service = CisaKevService(clock=lambda: now[0])
+
+    with patch("services.cisa_kev_service.requests.get", return_value=response) as get:
+        assert service.get_cve(" cve-2024-3400 ").cve_id == "CVE-2024-3400"
+        assert service.get_cve("CVE-2024-3400").cve_id == "CVE-2024-3400"
+        assert get.call_count == 1
+
+        now[0] += CisaKevService.CACHE_TTL
+        assert service.get_cve("CVE-2024-3400").cve_id == "CVE-2024-3400"
+        assert get.call_count == 2
+
+
+@pytest.mark.parametrize("response", [Mock(status_code=503), Mock(status_code=200, text="<html>broken</html>")])
+def test_cisa_service_rejects_unavailable_or_unrecognizable_catalog(response):
+    with patch("services.cisa_kev_service.requests.get", return_value=response):
+        with pytest.raises(CisaKevSourceError):
+            CisaKevService().get_cve("CVE-2024-3400")
+
+
+def test_cisa_service_rejects_truncated_expected_table_rows():
+    html = CATALOG_HTML.replace(
+        "<td>Apply vendor mitigations.</td>", ""
+    )
+    response = Mock(status_code=200, text=html)
+
+    with patch("services.cisa_kev_service.requests.get", return_value=response):
+        with pytest.raises(CisaKevSourceError):
+            CisaKevService().get_cve("CVE-2024-3400")
+
+
+def test_cisa_service_wraps_network_failures_as_source_errors():
+    with patch(
+        "services.cisa_kev_service.requests.get", side_effect=requests.Timeout()
+    ):
+        with pytest.raises(CisaKevSourceError):
+            CisaKevService().get_cve("CVE-2024-3400")

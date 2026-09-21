@@ -242,6 +242,57 @@ def test_external_intelligence_review_explains_cisa_no_match_without_calling_it_
     assert b"affected product and version" in response.data
 
 
+def test_external_intelligence_review_preserves_nvd_when_cisa_is_unavailable(client, monkeypatch):
+    response_mock = Mock(status_code=200)
+    response_mock.raise_for_status.return_value = None
+    response_mock.json.return_value = nvd_response()
+
+    def unavailable(_service, _cve_id):
+        from services.cisa_kev_service import CisaKevSourceError
+
+        raise CisaKevSourceError
+
+    monkeypatch.setattr(CisaKevService, "get_cve", unavailable)
+    with patch("services.nvd_service.requests.get", return_value=response_mock):
+        response = client.get(
+            "/intelligence",
+            query_string={"change_ticket": "CHG-1042", "cve": "CVE-2024-3400"},
+        )
+
+    assert response.status_code == 503
+    assert b"NVD API evidence" in response.data
+    assert b"CISA KEV evidence unavailable" in response.data
+    assert b"cannot claim" in response.data
+    assert b"Firewall Allow Rule for Vendor Monitoring" in response.data
+    assert b"Manually assigned Risk Level" in response.data
+    assert b"Traceback" not in response.data
+
+
+@pytest.mark.parametrize("failure", [requests.Timeout(), requests.HTTPError()])
+def test_external_intelligence_review_handles_cisa_acquisition_failures(
+    client, monkeypatch, failure
+):
+    response_mock = Mock(status_code=200)
+    response_mock.raise_for_status.return_value = None
+    response_mock.json.return_value = nvd_response()
+
+    def unavailable(_service, _cve_id):
+        from services.cisa_kev_service import CisaKevSourceError
+
+        raise CisaKevSourceError from failure
+
+    monkeypatch.setattr(CisaKevService, "get_cve", unavailable)
+    with patch("services.nvd_service.requests.get", return_value=response_mock):
+        response = client.get(
+            "/intelligence",
+            query_string={"change_ticket": "CHG-1042", "cve": "CVE-2024-3400"},
+        )
+
+    assert response.status_code == 503
+    assert b"CISA KEV evidence unavailable" in response.data
+    assert b"Traceback" not in response.data
+
+
 @pytest.mark.parametrize(
     "status,heading,body",
     [

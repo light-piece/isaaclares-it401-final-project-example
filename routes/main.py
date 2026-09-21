@@ -135,17 +135,25 @@ def register_routes(app):
                 ), 502
 
         kev_evidence = None
+        cisa_available = True
         if evidence:
             try:
                 kev_evidence = CisaKevService(app.config.get("CISA_KEV_URL")).get_cve(cve)
             except CisaKevSourceError:
-                return render_template(
-                    "external_intelligence_error.html",
-                    heading="CISA KEV source unavailable",
-                    message="The application could not acquire CISA Known Exploited Vulnerabilities evidence right now. Please try again later.",
-                    selected_change=selected_change,
-                    cve=cve,
-                ), 502
+                cisa_available = False
+                return (
+                    render_template(
+                        "external_intelligence.html",
+                        changes=changes,
+                        selected_change=selected_change,
+                        cve=cve,
+                        evidence=evidence,
+                        kev_evidence=None,
+                        cisa_available=cisa_available,
+                        cisa_error="The CISA KEV catalog could not be retrieved or parsed. CISA listing status cannot be determined.",
+                    ),
+                    503,
+                )
 
         return render_template(
             "external_intelligence.html",
@@ -154,4 +162,5 @@ def register_routes(app):
             cve=cve,
             evidence=evidence,
             kev_evidence=kev_evidence,
+            cisa_available=cisa_available,
         )

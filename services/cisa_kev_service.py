@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from datetime import datetime, timezone
 from html.parser import HTMLParser
 import re
+import time
 
 import requests
 
@@ -25,6 +26,12 @@ class CisaKevEvidence:
     required_action: str
     source_url: str
     retrieved_at: str
+
+
+@dataclass(frozen=True)
+class _CachedLookup:
+    expires_at: float
+    evidence: "CisaKevEvidence | None"
 
 
 class _TableParser(HTMLParser):
@@ -79,35 +86,75 @@ class CisaKevService:
     CATALOG_URL = "https://www.cisa.gov/known-exploited-vulnerabilities-catalog"
     USER_AGENT = "InfraRisk Analyzer/2.0 (IT401 educational project)"
     TIMEOUT = 10
+    CACHE_TTL = 15 * 60
+    _cache = {}
 
-    def __init__(self, catalog_url=None, timeout=TIMEOUT):
+    def __init__(self, catalog_url=None, timeout=TIMEOUT, clock=None):
         self.catalog_url = catalog_url or self.CATALOG_URL
         self.timeout = timeout
+        self.clock = clock or time.monotonic
 
     def get_cve(self, cve_id):
+        requested_id = cve_id.strip().upper()
+        cache_key = (self.catalog_url, requested_id)
+        cached = self._cache.get(cache_key)
+        if cached and cached.expires_at > self.clock():
+            return cached.evidence
+        if cached:
+            del self._cache[cache_key]
+
         try:
             response = requests.get(
                 self.catalog_url,
-                params={"search_api_fulltext": cve_id},
+                params={"search_api_fulltext": requested_id},
                 headers={"User-Agent": self.USER_AGENT},
                 timeout=self.timeout,
             )
-            response.raise_for_status()
+            if not 200 <= response.status_code < 300:
+                raise CisaKevSourceError
             parser = _TableParser()
             parser.feed(response.text)
-        except (requests.RequestException, TypeError, ValueError):
-            raise CisaKevSourceError
+        except CisaKevSourceError:
+            raise
+        except (requests.RequestException, TypeError, ValueError, AttributeError):
+            raise CisaKevSourceError from None
 
-        requested_id = cve_id.upper()
         headers = None
+        found_expected_table = False
+        malformed_row = False
         for row in parser.rows:
             row_headers = [value for tag, value in row if tag == "th"]
             if row_headers:
                 headers = row_headers
+                found_expected_table = self._has_expected_headers(headers)
+            if found_expected_table and headers:
+                cells = [value for tag, value in row if tag == "td"]
+                if cells and len(headers) != len(cells):
+                    malformed_row = True
             evidence = self._normalize_row(row, requested_id, headers)
             if evidence:
+                self._cache[cache_key] = _CachedLookup(
+                    self.clock() + self.CACHE_TTL, evidence
+                )
                 return evidence
+        if not found_expected_table or malformed_row:
+            raise CisaKevSourceError
+
+        self._cache[cache_key] = _CachedLookup(self.clock() + self.CACHE_TTL, None)
         return None
+
+    @staticmethod
+    def _has_expected_headers(headers):
+        names = {_field_name(header) for header in headers}
+        return {
+            "cveid",
+            "vendorproject",
+            "product",
+            "vulnerabilityname",
+            "dateadded",
+            "duedate",
+            "requiredaction",
+        }.issubset(names)
 
     def _normalize_row(self, row, requested_id, headers=None):
         cells = [value for tag, value in row if tag == "td"]

@@ -3,10 +3,15 @@
 {% block title %}External Intelligence Review | InfraRisk Analyzer{% endblock %}
 
 {% block content %}
-<header class="page-intro intelligence-intro">
+<div class="intelligence-page">
+<header class="page-intro intelligence-intro intelligence-hero">
+    <div class="cyber-highway" aria-hidden="true"><span></span><span></span><span></span><i></i><i></i></div>
     <p class="eyebrow">External Intelligence Review</p>
-    <h1>Relate current vulnerability evidence to an IT Change.</h1>
-    <p>Select an IT Change and enter a CVE Identifier. The application retrieves source-attributed NVD and CISA KEV evidence for review.</p>
+    <h1>Understand what could affect your change.</h1>
+    <p>Start with the change you understand. We’ll use a CVE Identifier to bring in current vulnerability evidence from NVD and CISA, then explain what to verify next.</p>
+    <div class="review-steps" aria-label="Review steps">
+        <span class="is-current"><b>01</b> Choose your change</span><span><b>02</b> Look up evidence</span><span><b>03</b> Decide what to verify</span>
+    </div>
 </header>
 
 <section class="intelligence-workspace" aria-labelledby="review-form-title">
@@ -23,14 +28,22 @@
             {% endfor %}
         </select>
 
-        <label for="cve">CVE Identifier</label>
-        <input id="cve" name="cve" type="text" value="{{ cve }}" placeholder="CVE-2024-3400" autocomplete="off" required>
+        <label for="cve">CVE Identifier <span class="label-help">a public vulnerability reference</span></label>
+        <input id="cve" name="cve" type="text" value="{{ cve }}" placeholder="CVE-2024-3400" autocomplete="off" list="practice-cves" required>
+        <datalist id="practice-cves"><option value="CVE-2024-3400"><option value="CVE-2021-44228"><option value="CVE-2023-34362"></datalist>
+        <div class="cve-explainer"><strong>New to CVEs?</strong> A CVE is a public identifier for a known software vulnerability. Try a practice example below, or use a CVE from a vendor advisory.</div>
+        <div class="practice-cves" aria-label="Practice CVE examples">
+            <span>Practice examples:</span>
+            <button type="button" data-practice-cve="CVE-2024-3400">CVE-2024-3400</button>
+            <button type="button" data-practice-cve="CVE-2021-44228">CVE-2021-44228</button>
+        </div>
 
-        <button type="submit">Acquire External Intelligence</button>
+        <button type="submit">Review this vulnerability <span aria-hidden="true">→</span></button>
+        <p class="form-footnote">The request is read-only. It does not change the IT Change or approve the window.</p>
     </form>
 
     {% if selected_change %}
-    <article class="intelligence-context" aria-labelledby="selected-change-title">
+    <article class="intelligence-context change-context-card" aria-labelledby="selected-change-title">
         <p class="eyebrow">Selected IT Change</p>
         <p class="context-ticket">{{ selected_change.change_ticket }} · {{ cve }}</p>
         <h2 id="selected-change-title">{{ selected_change.title }}</h2>
@@ -55,7 +68,7 @@
 </section>
 
 {% if evidence %}
-<section class="guided-review" aria-labelledby="guided-review-title">
+<section class="guided-review evidence-ledger" aria-labelledby="guided-review-title">
     <div class="guided-review-heading">
         <p class="eyebrow">Guided interpretation</p>
         <h2 id="guided-review-title">Start with the question that matters to your review</h2>
@@ -94,8 +107,8 @@
     <p class="no-script-note">If JavaScript is unavailable, all three questions and their answers remain available below. Technical source details are grouped after the plain-language interpretation.</p>
 </section>
 
-<section class="intelligence-workspace" aria-labelledby="nvd-evidence-title">
-    <article class="intelligence-context">
+<section class="intelligence-workspace evidence-workspace" aria-labelledby="nvd-evidence-title">
+    <article class="intelligence-context evidence-card nvd-evidence-card">
         <p class="eyebrow">NVD API evidence</p>
         <h2 id="nvd-evidence-title">{{ evidence.cve_id }}</h2>
         <details class="source-details">
@@ -112,8 +125,8 @@
     </article>
 </section>
 
-<section class="intelligence-workspace" aria-labelledby="kev-evidence-title">
-    <article class="intelligence-context">
+<section class="intelligence-workspace evidence-workspace" aria-labelledby="kev-evidence-title">
+    <article class="intelligence-context evidence-card cisa-evidence-card">
         <p class="eyebrow">CISA KEV catalog evidence</p>
         {% if kev_evidence %}
         <h2 id="kev-evidence-title">{{ kev_evidence.cve_id }} is listed</h2>
@@ -150,6 +163,13 @@
 
 {% block scripts %}
 <script>
+    document.querySelectorAll("[data-practice-cve]").forEach((example) => {
+        example.addEventListener("click", () => {
+            const input = document.querySelector("#cve");
+            input.value = example.dataset.practiceCve;
+            input.focus();
+        });
+    });
     document.querySelectorAll(".question-control").forEach((control) => {
         control.addEventListener("click", () => {
             const selected = control.dataset.question;
@@ -167,3 +187,4 @@
     });
 </script>
 {% endblock %}
+ </div>

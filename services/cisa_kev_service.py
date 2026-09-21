@@ -74,6 +74,67 @@ class _TableParser(HTMLParser):
             self._cell.append(data)
 
 
+class _TeaserParser(HTMLParser):
+    """Parse the current card-based CISA KEV catalog markup."""
+
+    def __init__(self):
+        super().__init__()
+        self.teasers = []
+        self._article = None
+        self._field = None
+        self._field_tag = None
+        self._text = []
+
+    def handle_starttag(self, tag, attrs):
+        attrs = dict(attrs)
+        classes = attrs.get("class", "").split()
+        if tag == "article" and "c-teaser" in classes:
+            self._article = {"vendor_project": "", "cve_id": "", "vulnerability_name": "", "date_added": "", "due_date": "", "required_action": ""}
+        if not self._article:
+            return
+        if tag == "a" and attrs.get("href", "").find("/CVERecord?id=") >= 0:
+            self._field = "cve_id"
+            self._field_tag = tag
+        elif "c-teaser__meta" in classes:
+            self._field = "vendor_project"
+            self._field_tag = tag
+        elif "c-teaser__vuln-name" in classes:
+            self._field = "vulnerability_name"
+            self._field_tag = tag
+        elif "c-teaser__teaser-action" in classes:
+            self._field = "required_action"
+            self._field_tag = tag
+        elif tag == "li":
+            self._field = "list_item"
+            self._field_tag = tag
+        if self._field_tag == tag:
+            self._text = []
+
+    def handle_endtag(self, tag):
+        if not self._article:
+            return
+        if tag != self._field_tag and tag != "article":
+            return
+        value = _clean(" ".join(self._text))
+        if self._field == "list_item" and value:
+            if "Date Added:" in value:
+                self._article["date_added"] = value.split("Date Added:", 1)[1].strip()
+            elif "Due Date:" in value:
+                self._article["due_date"] = value.split("Due Date:", 1)[1].strip()
+        elif self._field in self._article and value:
+            self._article[self._field] = value
+        if tag == "article":
+            self.teasers.append(self._article)
+            self._article = None
+            self._field = None
+            self._field_tag = None
+        self._text = []
+
+    def handle_data(self, data):
+        if self._article is not None:
+            self._text.append(data)
+
+
 def _clean(value):
     return re.sub(r"\s+", " ", value).strip()
 
@@ -114,10 +175,30 @@ class CisaKevService:
                 raise CisaKevSourceError
             parser = _TableParser()
             parser.feed(response.text)
+            teaser_parser = _TeaserParser()
+            teaser_parser.feed(response.text)
         except CisaKevSourceError:
             raise
         except (requests.RequestException, TypeError, ValueError, AttributeError):
             raise CisaKevSourceError from None
+
+        for teaser in teaser_parser.teasers:
+            if teaser["cve_id"].upper() == requested_id:
+                vendor_project = teaser["vendor_project"]
+                vendor, _, product = vendor_project.partition("|")
+                evidence = CisaKevEvidence(
+                    cve_id=requested_id,
+                    vendor_project=vendor.strip() or "Unavailable",
+                    product=product.strip() or "Unavailable",
+                    vulnerability_name=teaser["vulnerability_name"] or "Unavailable",
+                    date_added=teaser["date_added"] or "Unavailable",
+                    due_date=teaser["due_date"] or "Unavailable",
+                    required_action=teaser["required_action"] or "Unavailable",
+                    source_url=self.catalog_url,
+                    retrieved_at=datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                )
+                self._cache[cache_key] = _CachedLookup(self.clock() + self.CACHE_TTL, evidence)
+                return evidence
 
         headers = None
         found_expected_table = False

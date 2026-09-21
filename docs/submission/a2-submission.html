@@ -44,20 +44,20 @@
         <p class="eyebrow">External intelligence for IT operations</p>
         <h1>InfraRisk Analyzer</h1>
         <p class="tagline">Review infrastructure changes before they become outages.</p>
-        <p>InfraRisk Analyzer extends the Assignment 1 Change Review Board with a request-time External Intelligence Review. An Operator selects a locally stored IT Change and enters a CVE Identifier. The application retrieves technical evidence from the NVD JSON API and an exploitation/remediation signal from the CISA Known Exploited Vulnerabilities catalog.</p>
+        <p>InfraRisk Analyzer extends the Assignment 1 Change Review Board with request-time External Intelligence. An Operator selects a locally stored IT Change, searches NVD by vendor/product, or enters a known CVE. The application retrieves technical evidence from the NVD JSON API and an exploitation/remediation signal from the CISA Known Exploited Vulnerabilities catalog.</p>
         <div class="notice"><strong>Boundary:</strong> External evidence informs human review. It does not prove that the selected Affected System is vulnerable, change the manually assigned Risk Level, approve or block the IT Change, or create a persistent source record.</div>
         <div class="three">
             <div class="card"><h3>API source</h3><p>NVD API 2.0 returns the English description, publication date, best CVSS metric, and record URL.</p></div>
             <div class="card"><h3>Scraped source</h3><p>CISA's public KEV table contributes vendor, product, vulnerability, dates, and required action.</p></div>
             <div class="card"><h3>Unified purpose</h3><p>Both sources answer what current vulnerability evidence an Operator should consider before a change window.</p></div>
         </div>
-        <figure><img src="../screenshots/home-desktop.png" alt="InfraRisk Analyzer homepage"><figcaption>Figure 1. Homepage preserves the A1 purpose and directs the Operator to Change Risk review.</figcaption></figure>
+        <figure><img src="../screenshots/home-a2-final.png" alt="InfraRisk Analyzer homepage with dark highway visual system"><figcaption>Figure 1. Final homepage: a human-centered command-center visual system with guided review entry.</figcaption></figure>
     </section>
 
     <section class="page">
         <p class="eyebrow">Acquisition and integration workflow</p>
         <h2>One review, two external evidence boundaries</h2>
-        <div class="flow"><span>Operator selects Change Ticket + enters CVE</span><b class="arrow">→</b><span>Validate and normalize input</span><b class="arrow">→</b><span>NVD authenticated JSON request</span><b class="arrow">→</b><span>CISA catalog HTML request</span></div>
+        <div class="flow"><span>Operator selects Change Ticket + enters vendor/product</span><b class="arrow">→</b><span>NVD keyword search returns possible CVEs</span><b class="arrow">→</b><span>Operator selects a candidate</span><b class="arrow">→</b><span>CISA catalog HTML request</span></div>
         <div class="flow"><span>Extract relevant JSON fields</span><b class="arrow">→</b><span>Parse, clean, exact-match table row</span><b class="arrow">→</b><span>Combine evidence with local IT Change</span><b class="arrow">→</b><span>Guided human interpretation</span></div>
         <h3>Source and environment contract</h3>
         <table>
@@ -74,7 +74,7 @@
         <p class="eyebrow">Verified integrated interface</p>
         <h2>External Intelligence Review</h2>
         <p>The selected Change Ticket remains visible beside both source panels. Guided questions separate source facts from Operator interpretation and preserve the local manually assigned Risk Level.</p>
-        <figure class="tall"><img src="../screenshots/external-intelligence-desktop.png" alt="Combined External Intelligence Review with NVD and CISA evidence"><figcaption>Figure 2. Combined desktop state: selected IT Change, NVD API evidence, CISA KEV catalog evidence, source details, and guided interpretation. Labels make API, scraped, and integrated requirements explicit.</figcaption></figure>
+        <figure class="tall"><img src="../screenshots/explore-a2-final.png" alt="Final Change Review Board with compact interactive dark cards"><figcaption>Figure 2. Final Change Review Board: compact interactive cards, expandable review detail, and full-page data highways.</figcaption></figure>
     </section>
 
     <section class="page">
@@ -90,7 +90,7 @@
             <tr><td>CISA exact-match miss</td><td>Displays “not listed in this catalog snapshot”; never claims safe or non-exposed.</td><td>No-match route test.</td></tr>
         </table>
         <h3>Verification record</h3>
-        <ul><li>Automated suite: <strong>41 passed</strong> with mocked sources; no live network or real credential required.</li><li>Production routes verified in the checked-in screenshots: homepage, Change Review Board, External Intelligence Review, source details, guided questions, and narrow responsive layout.</li><li>Reduced-motion behavior is implemented in <code>static/style.css</code>; JavaScript enhancement keeps all answers available without scripting.</li><li>Repository scan: no tracked API key, token, password, local environment file, or secret-bearing config; only placeholder <code>.env.example</code>.</li><li>Manual authenticated NVD live-source verification is intentionally not claimed in this artifact because this environment has no real NVD credential. It is the remaining operator-only release step after configuring a private local <code>.env</code>.</li></ul>
+        <ul><li>Automated suite: <strong>43 passed</strong> with mocked sources; no live credential is required for reproducibility.</li><li>Production routes verified in the checked-in screenshots: homepage, compact Change Review Board, External Intelligence Review, side-by-side discovery layout, source details, guided questions, and narrow responsive layout.</li><li>Reduced-motion behavior is implemented in <code>static/style.css</code>; JavaScript enhancement keeps all answers available without scripting.</li><li>Repository scan: no tracked API key, token, password, local environment file, or secret-bearing config; only placeholder <code>.env.example</code>.</li><li>Live check: authenticated NVD keyword search returned normalized results; the current CISA card markup also parsed successfully for a current catalog entry.</li></ul>
     </section>
 
     <section class="page">
@@ -103,7 +103,7 @@
         <h3>Assignment 3 direction</h3>
         <p>Add persistent IT Changes, Risk Findings, Approval Records, Audit Trail events, and timestamped External Intelligence Snapshots. A snapshot will retain the normalized NVD/CISA evidence, source URLs, retrieval timestamps, selected Change Ticket, and Operator review context without turning external evidence into automatic approval or blocking logic.</p>
         <h3>Release checklist</h3>
-        <p class="small">The repository contains the A1 PDF unchanged plus this versioned A2 PDF, updated README sections, focused service and route tests, source fixtures, and checked-in browser screenshots. The final local steps are <code>.venv/bin/python -m pytest -q</code>, a private-key live NVD check, and a final secret scan before submission.</p>
+        <p class="small">The repository contains the A1 PDF unchanged plus this versioned A2 PDF, updated README sections, focused service and route tests, NVD discovery, CISA table/card parsers, and checked-in browser screenshots. Final verification: <code>.venv/bin/python -m pytest -q</code> reports 43 passing tests. A private-key live NVD check and a current CISA card-parser check succeeded without exposing the credential; an older requested CVE was correctly reported as unavailable when it was not present in the current CISA result page.</p>
     </section>
 </body>
 </html>

@@ -62,6 +62,20 @@ def register_routes(app):
             risk_counts=risk_counts,
         )
 
+    @app.route("/prototype/external-intelligence")
+    def external_intelligence_prototype():
+        """Throwaway visual prototype; enabled only with PROTOTYPE_MODE=1."""
+        if not app.config.get("PROTOTYPE_MODE"):
+            abort(404)
+        variant = request.args.get("variant", "A").upper()
+        if variant not in {"A", "B", "C"}:
+            abort(400, description="Unknown prototype variant.")
+        return render_template(
+            "external_intelligence_prototype.html",
+            variant=variant,
+            variants={"A": "Evidence lanes", "B": "Command map", "C": "Review flow"},
+        )
+
     @app.route("/intelligence")
     def external_intelligence_review():
         data_path = os.path.join(app.config["DATA_DIR"], "it_changes.json")

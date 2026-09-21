@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Prototype · External Intelligence Review{% endblock %}
+{% block content %}
+<div class="proto-shell proto-{{ variant|lower }}">
+    <div class="proto-highways" aria-hidden="true">
+        <span class="lane-local"><b>CHANGE CONTEXT</b></span>
+        <span class="lane-nvd"><b>NVD ANALYSIS</b></span>
+        <span class="lane-cisa"><b>CISA SIGNAL</b></span>
+        <span class="lane-action"><b>OPERATOR ACTION</b></span>
+    </div>
+    <header class="proto-header">
+        <p class="proto-kicker">THROWAWAY UI PROTOTYPE · {{ variants[variant]|upper }}</p>
+        <h1>Follow the evidence before the change moves.</h1>
+        <p>Four connected lanes keep the human task visible: understand the change, inspect source evidence, and decide what to verify next.</p>
+    </header>
+
+    {% if variant == "A" %}
+    <section class="proto-lane-layout">
+        <article class="proto-card proto-context is-selected" data-proto-card>
+            <small>01 · CHANGE CONTEXT</small><h2>Firewall Allow Rule</h2><p>Vendor monitoring access to a restricted management endpoint.</p>
+            <div class="proto-metric"><span>High Risk</span><span>CHG-1042</span></div>
+            <p class="proto-teach"><strong>Learn:</strong> An IT Change is a proposed infrastructure modification that needs impact, mitigation, and rollback review.</p>
+            <button type="button" data-open-card>Start guided review →</button>
+        </article>
+        <article class="proto-card proto-nvd" data-proto-card><small>02 · NVD ANALYSIS</small><h2>CVE-2024-3400</h2><p>OS command injection vulnerability in PAN-OS software.</p><div class="proto-metric"><span>CVSS 10.0</span><span>CRITICAL</span></div><p class="proto-teach">Possible match because the review is investigating a firewall product. Verify the exact product and version.</p><button type="button" data-open-card>Inspect NVD signal →</button></article>
+        <article class="proto-card proto-cisa" data-proto-card><small>03 · CISA SIGNAL</small><h2>Known exploited</h2><p>Palo Alto Networks · PAN-OS</p><div class="proto-metric"><span>KEV listed</span><span>Due 2024-05-06</span></div><p class="proto-teach">CISA adds urgency, but a listing does not prove this selected system is exposed.</p><button type="button" data-open-card>Inspect CISA signal →</button></article>
+        <article class="proto-card proto-action" data-proto-card><small>04 · OPERATOR ACTION</small><h2>Verify before the window</h2><p>Compare the affected product and version with the change plan.</p><p class="proto-teach">The app gives you a path to investigate. It does not approve or block the change.</p><button type="button" data-open-card>See next checks →</button></article>
+    </section>
+    {% elif variant == "B" %}
+    <section class="proto-map-layout">
+        <aside class="proto-sidebar"><small>YOUR REVIEW</small><h2>CHG-1042</h2><p>Firewall Allow Rule for Vendor Monitoring</p><hr><strong>What are you trying to learn?</strong><ol><li class="active">Understand the change</li><li>Compare evidence</li><li>Choose next checks</li></ol><button type="button" data-open-card>Open guided review</button></aside>
+        <div class="proto-map-cards"><article class="proto-card proto-context" data-proto-card><small>CHANGE CONTEXT</small><h2>Campus perimeter firewall</h2><p>External access to a restricted management endpoint.</p></article><article class="proto-card proto-nvd" data-proto-card><small>NVD API</small><h2>Critical technical signal</h2><p>CVE-2024-3400 · CVSS 10.0</p></article><article class="proto-card proto-cisa" data-proto-card><small>CISA KEV SCRAPE</small><h2>Known exploitation signal</h2><p>PAN-OS is listed in the KEV catalog.</p></article><div class="proto-verdict"><small>HUMAN CHECK</small><h2>Does this firewall run the affected version?</h2><p>That is the question the sources cannot answer for you.</p></div></div>
+    </section>
+    {% else %}
+    <section class="proto-flow-layout"><div class="proto-flow-step"><b>01</b><small>LEARN THE CHANGE</small><h2>What is changing?</h2><p>Allow vendor monitoring traffic through the perimeter firewall.</p></div><div class="proto-flow-step"><b>02</b><small>FIND SIGNALS</small><h2>What do sources say?</h2><p>NVD reports a critical PAN-OS vulnerability; CISA lists known exploitation.</p></div><div class="proto-flow-step"><b>03</b><small>MAKE THE CHECK</small><h2>What should you verify?</h2><p>Confirm product/version, mitigation, rollback, and Security review before the window.</p></div><button type="button" class="proto-primary" data-open-card>Begin the guided review →</button></section>
+    {% endif %}
+</div>
+<nav class="proto-switcher" aria-label="Prototype variants"><a href="?variant={{ 'C' if variant == 'A' else 'A' if variant == 'B' else 'B' }}">←</a><strong>{{ variant }} · {{ variants[variant] }}</strong><a href="?variant={{ 'B' if variant == 'A' else 'C' if variant == 'B' else 'A' }}">→</a></nav>
+{% endblock %}
+{% block scripts %}<script>
+document.querySelectorAll("[data-open-card]").forEach((button) => button.addEventListener("click", () => {
+  document.querySelectorAll("[data-proto-card], .proto-flow-step, .proto-verdict").forEach((card) => card.classList.remove("is-focus", "is-muted"));
+  const card = button.closest("[data-proto-card], .proto-flow-step, .proto-verdict");
+  if (card) { card.classList.add("is-focus"); document.querySelectorAll("[data-proto-card], .proto-flow-step, .proto-verdict").forEach((other) => { if (other !== card) other.classList.add("is-muted"); }); }
+}));
+</script>{% endblock %}

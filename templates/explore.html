@@ -3,11 +3,13 @@
 {% block title %}Change Review Board | InfraRisk Analyzer{% endblock %}
 
 {% block content %}
+<div class="experience-page board-experience">
+<div class="semantic-highways" aria-hidden="true"><span>CHANGE CONTEXT</span><span>NVD ANALYSIS</span><span>CISA SIGNAL</span><span>OPERATOR ACTION</span></div>
 <section class="page-intro">
     <p class="eyebrow">Change Review Board</p>
     <h1>Review proposed IT Changes by risk.</h1>
-    <p>Compare fictional infrastructure changes across Risk Level, Change Type, affected systems, review readiness, and recovery planning.</p>
-    <p class="disclosure"><strong>Demonstration data, not a production change-management or approval system.</strong> Risk Levels are manually assigned in sample data and explained by visible Risk Signals.</p>
+    <p>Choose a guided practice case to learn the operator task, then follow its context, evidence, and next checks.</p>
+    <p class="disclosure"><strong>Practice workspace:</strong> These six fictional cases teach common infrastructure-review situations. They are not live campus changes.</p>
 </section>
 
 <section class="review-board" aria-labelledby="results-title">
@@ -59,12 +61,12 @@
 
     <div class="change-grid">
         {% for change in changes %}
-        <article class="change-card risk-{{ change.risk_level|lower }}">
+        <article class="change-card risk-{{ change.risk_level|lower }} interactive-change-card" tabindex="0" data-change-card>
             <div class="card-topline">
                 <span class="risk-badge">{{ change.risk_level }} Risk</span>
                 <span>{{ change.change_type }}</span>
             </div>
-            <h3>{{ change.title }}</h3>
+            <p class="card-action-hint">Click to lift this case into focus</p><h3>{{ change.title }}</h3>
             <p>{{ change.summary }}</p>
 
             <dl class="metadata-grid">
@@ -75,6 +77,9 @@
                 <div><dt>Review status</dt><dd>{{ change.review_status }}</dd></div>
             </dl>
 
+            <section class="card-section card-learning">
+                <h4>What you will learn</h4><p>Identify the change impact, check the affected technology, and prepare a mitigation and rollback conversation.</p>
+            </section>
             <section class="card-section">
                 <h4>Risk signals</h4>
                 <ul>
@@ -115,4 +120,11 @@
         {% endfor %}
     </div>
 </section>
+</div>
 {% endblock %}
+{% block scripts %}<script>
+document.querySelectorAll("[data-change-card]").forEach((card) => {
+  card.addEventListener("click", (event) => { if (event.target.closest("a,button,select,input")) return; document.querySelectorAll("[data-change-card]").forEach((item) => item.classList.toggle("is-muted", item !== card)); card.classList.toggle("is-focus"); });
+  card.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); card.click(); } });
+});
+</script>{% endblock %}

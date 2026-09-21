@@ -23,6 +23,7 @@ class Config:
         "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
     )
     AI_SERVICE_API_KEY = os.environ.get("AI_SERVICE_API_KEY")
+    PROTOTYPE_MODE = os.environ.get("PROTOTYPE_MODE") == "1"
 
 
 class DevelopmentConfig(Config):

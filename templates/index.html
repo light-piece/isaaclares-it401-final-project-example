@@ -3,12 +3,14 @@
 {% block title %}InfraRisk Analyzer | IT Change-Risk Review{% endblock %}
 
 {% block content %}
+<div class="experience-page home-experience">
+<div class="semantic-highways" aria-hidden="true"><span>CHANGE CONTEXT</span><span>RISK SIGNALS</span><span>RECOVERY PATH</span></div>
 <section class="hero">
     <div class="hero-copy">
         <p class="eyebrow">IT operations review</p>
         <h1>Review infrastructure changes before they become outages.</h1>
-        <p class="lede">InfraRisk Analyzer helps Operators compare proposed IT Changes, spot risk signals, and prepare mitigations before a maintenance window.</p>
-        <a class="button" href="{{ url_for('explore') }}">Review Change Risk <span aria-hidden="true">-&gt;</span></a>
+        <p class="lede">InfraRisk Analyzer helps Operators understand a proposed IT Change, follow the evidence, and prepare mitigations before a maintenance window.</p>
+        <a class="button" href="{{ url_for('explore') }}">Start a guided review · Review Change Risk <span aria-hidden="true">-&gt;</span></a>
     </div>
     <div class="hero-art" aria-hidden="true">
         <svg viewBox="0 0 320 260">
@@ -51,4 +53,6 @@
     </div>
     <p>A High Risk firewall allow rule touches the production perimeter and depends on external source IP ranges. Mitigate by limiting scope, enabling rule logging, and confirming Security sign-off before the scheduled window.</p>
 </section>
+<section class="learning-callout"><p class="eyebrow">How to use this workspace</p><h2>Choose a change, learn what it means, then follow its evidence.</h2><p>Each card is a guided practice case. Open one to understand the operator task, identify the technology involved, and investigate related vulnerability signals.</p><a class="text-link" href="{{ url_for('explore') }}">Open the Change Review Board →</a></section>
+</div>
 {% endblock %}

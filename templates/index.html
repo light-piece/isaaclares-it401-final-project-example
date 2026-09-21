@@ -29,17 +29,17 @@
 </section>
 
 <section class="capabilities" aria-label="InfraRisk Analyzer capabilities">
-    <article>
+    <article tabindex="0" data-home-card>
         <span>01</span>
         <h2>Risk signals</h2>
         <p>Surface production impact, security exposure, broad user impact, and missing review details before an IT Change proceeds.</p>
     </article>
-    <article>
+    <article tabindex="0" data-home-card>
         <span>02</span>
         <h2>Rollback readiness</h2>
         <p>Keep recovery planning visible so Operators can judge whether a change can be reversed if the window goes poorly.</p>
     </article>
-    <article>
+    <article tabindex="0" data-home-card>
         <span>03</span>
         <h2>Review metadata</h2>
         <p>Compare Change Tickets, owners, Review Status, Approval Records, and Audit Trail events in one scannable board.</p>
@@ -56,3 +56,9 @@
 <section class="learning-callout"><p class="eyebrow">How to use this workspace</p><h2>Choose a change, learn what it means, then follow its evidence.</h2><p>Each card is a guided practice case. Open one to understand the operator task, identify the technology involved, and investigate related vulnerability signals.</p><a class="text-link" href="{{ url_for('explore') }}">Open the Change Review Board →</a></section>
 </div>
 {% endblock %}
+{% block scripts %}<script>
+document.querySelectorAll("[data-home-card]").forEach((card) => {
+  card.addEventListener("click", () => { document.querySelectorAll("[data-home-card]").forEach((item) => item.classList.toggle("is-muted", item !== card)); card.classList.toggle("is-focus"); });
+  card.addEventListener("keydown", (event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); card.click(); } });
+});
+</script>{% endblock %}

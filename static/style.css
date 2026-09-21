@@ -667,7 +667,7 @@ footer p { margin: 0; }
 
 /* External Intelligence Review: calm command-center treatment. */
 .intelligence-page { margin: 0 calc(50% - 50vw); overflow: hidden; padding: 0 max(24px, calc((100vw - 1180px) / 2)); position: relative; }
-.intelligence-page::before { background: radial-gradient(circle at 70% 4%, rgba(32, 129, 165, .18), transparent 34%), linear-gradient(135deg, #0b1725, #101b2a 55%, #1b1730); content: ""; inset: 0 0 auto; height: 690px; pointer-events: none; position: absolute; z-index: -2; }
+.intelligence-page::before { background: radial-gradient(circle at 70% 4%, rgba(32, 129, 165, .18), transparent 34%), linear-gradient(135deg, #0b1725, #101b2a 55%, #1b1730); content: ""; inset: 0; min-height: 100%; pointer-events: none; position: absolute; z-index: -2; }
 .intelligence-hero { border-top: 0; color: white; min-height: 440px; padding-bottom: 40px; padding-top: 82px; position: relative; }
 .intelligence-hero h1 { color: white; max-width: 760px; }
 .intelligence-hero > p:not(.eyebrow) { color: #c9d8e7; max-width: 720px; }
@@ -729,15 +729,22 @@ footer p { margin: 0; }
 
 /* Shared human-centered visual language for Home and the Change Review Board. */
 .experience-page { margin: 0 calc(50% - 50vw); min-height: 760px; overflow: hidden; padding: 0 max(24px, calc((100vw - 1180px) / 2)); position: relative; }
-.experience-page::before { background: linear-gradient(135deg, #0b1725, #101b2a 58%, #1b1730); content: ""; inset: 0 0 auto; height: 720px; pointer-events: none; position: absolute; z-index: -2; }
+.experience-page::before { background: linear-gradient(135deg, #0b1725, #101b2a 58%, #1b1730); content: ""; inset: 0; min-height: 100%; pointer-events: none; position: absolute; z-index: -2; }
 .semantic-highways { inset: 0; opacity: .34; pointer-events: none; position: absolute; z-index: -1; }
 .semantic-highways span { border-top: 2px solid #22ddeb; border-radius: 50%; color: #22ddeb; height: 230px; left: -8%; position: absolute; top: 4%; transform: rotate(-7deg); width: 116%; }
 .semantic-highways span:nth-child(2) { color: #58a7ff; top: 20%; transform: rotate(7deg); }.semantic-highways span:nth-child(3) { color: #ff4e70; top: 42%; transform: rotate(-5deg); }.semantic-highways span:nth-child(4) { color: #ffc64a; top: 64%; transform: rotate(6deg); }
-.semantic-highways span::after { background: currentColor; border-radius: 50%; box-shadow: 0 0 14px currentColor; content: ""; height: 6px; left: 35%; position: absolute; top: -4px; width: 6px; }
+.semantic-highways span::after { animation: shared-packet 6s linear infinite; background: currentColor; border-radius: 50%; box-shadow: 0 0 14px currentColor; content: ""; height: 6px; left: 8%; position: absolute; top: -4px; width: 6px; }
+.semantic-highways span:nth-child(2)::after { animation-delay: -1.7s; }.semantic-highways span:nth-child(3)::after { animation-delay: -3.2s; }.semantic-highways span:nth-child(4)::after { animation-delay: -4.4s; }
+@keyframes shared-packet { from { transform: translateX(0); } to { transform: translateX(1000px); } }
 .home-experience .hero { background: transparent; padding-left: 0; padding-right: 0; position: relative; }.home-experience .hero h1 { color: white; }.home-experience .hero .eyebrow { color: #6de8f1; }.home-experience .lede { color: #c3d7e7; }.home-experience .capabilities { padding-top: 28px; }.home-experience .capabilities article, .home-experience .risk-summary, .learning-callout { backdrop-filter: blur(16px); background: rgba(18,38,57,.78); border-color: #365875; color: white; }.home-experience .capabilities h2, .home-experience .risk-summary h2, .learning-callout h2 { color: white; }.home-experience .capabilities p, .home-experience .risk-summary p, .learning-callout p { color: #bfd2e2; }.learning-callout { border: 1px solid #365875; border-radius: 10px; margin: 24px 0 72px; padding: clamp(25px, 4vw, 42px); }.learning-callout .eyebrow { color: #6de8f1; }.learning-callout .text-link { color: #70e8f2; }
 .board-experience .page-intro { color: white; padding-left: 0; padding-right: 0; position: relative; }.board-experience .page-intro h1 { color: white; }.board-experience .page-intro > p:not(.eyebrow) { color: #c3d7e7; }.board-experience .page-intro .eyebrow { color: #6de8f1; }.board-experience .review-board { position: relative; }.board-experience .filters, .board-experience .risk-count, .board-experience .change-card, .board-experience .empty-state { backdrop-filter: blur(16px); background: rgba(18,38,57,.8); border-color: #365875; color: white; }.board-experience .filters label, .board-experience .results-heading p, .board-experience .metadata-grid dt, .board-experience .card-section h4 { color: #9db6c9; }.board-experience .results-heading h2 { color: white; }.board-experience .change-card p, .board-experience .metadata-grid dd, .board-experience .card-section li { color: #c3d7e7; }.board-experience .change-card h3 { color: white; }.board-experience .approval-list li { background: rgba(255,255,255,.08); }.board-experience .approval-list strong { color: #70e8f2; }.interactive-change-card { cursor: pointer; position: relative; transition: opacity .3s, transform .35s, box-shadow .35s; }.interactive-change-card:focus-visible { outline: 3px solid #70e8f2; outline-offset: 4px; }.interactive-change-card.is-focus { box-shadow: 0 0 0 2px rgba(112,232,242,.55), 0 30px 80px rgba(0,0,0,.4); transform: translateY(-12px) scale(1.02); z-index: 2; }.interactive-change-card.is-muted { opacity: .32; transform: scale(.98); }.card-action-hint { color: #70e8f2 !important; font-size: .7rem; font-weight: 850; letter-spacing: .08em; margin: 9px 0 -12px; text-transform: uppercase; }
 @media (max-width: 760px) { .experience-page { padding: 0 18px; }.semantic-highways span { width: 150%; }.home-experience .hero { padding-left: 22px; padding-right: 22px; }.board-experience .page-intro { padding-top: 55px; } }
 @media (prefers-reduced-motion: reduce) { .interactive-change-card { transition: none; } }
+.home-experience .capabilities article { cursor: pointer; transition: opacity .3s, transform .35s, box-shadow .35s; }
+.home-experience .capabilities article:focus-visible { outline: 3px solid #70e8f2; outline-offset: 4px; }
+.home-experience .capabilities article.is-focus { box-shadow: 0 0 0 2px rgba(112,232,242,.55), 0 26px 70px rgba(0,0,0,.4); transform: translateY(-10px) scale(1.02); }
+.home-experience .capabilities article.is-muted { opacity: .35; transform: scale(.98); }
+@media (prefers-reduced-motion: reduce) { .home-experience .capabilities article { transition: none; } }
 
 /* Final shared dark visual system: no white surfaces, one type hierarchy. */
 main { color: var(--ink); }

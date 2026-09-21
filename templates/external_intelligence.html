@@ -6,7 +6,7 @@
 <header class="page-intro intelligence-intro">
     <p class="eyebrow">External Intelligence Review</p>
     <h1>Relate current vulnerability evidence to an IT Change.</h1>
-    <p>Select an IT Change and enter a CVE Identifier. Your selection will be validated before external evidence is acquired.</p>
+    <p>Select an IT Change and enter a CVE Identifier. The application retrieves source-attributed NVD evidence for review.</p>
 </header>
 
 <section class="intelligence-workspace" aria-labelledby="review-form-title">
@@ -26,7 +26,7 @@
         <label for="cve">CVE Identifier</label>
         <input id="cve" name="cve" type="text" value="{{ cve }}" placeholder="CVE-2024-3400" autocomplete="off" required>
 
-        <button type="submit">Prepare External Intelligence Review</button>
+        <button type="submit">Acquire External Intelligence</button>
     </form>
 
     {% if selected_change %}
@@ -39,7 +39,11 @@
             <div><dt>Affected System</dt><dd>{{ selected_change.affected_system }}</dd></div>
             <div><dt>Manually assigned Risk Level</dt><dd>{{ selected_change.risk_level }}</dd></div>
         </dl>
+        {% if evidence %}
+        <p class="source-pending">External Intelligence informs review; it does not change this IT Change's Risk Level, Review Status, or Approval Records.</p>
+        {% else %}
         <p class="source-pending">Source evidence has not been acquired yet.</p>
+        {% endif %}
     </article>
     {% else %}
     <aside class="intelligence-empty-state">
@@ -49,4 +53,21 @@
     </aside>
     {% endif %}
 </section>
+
+{% if evidence %}
+<section class="intelligence-workspace" aria-labelledby="nvd-evidence-title">
+    <article class="intelligence-context">
+        <p class="eyebrow">NVD API evidence</p>
+        <h2 id="nvd-evidence-title">{{ evidence.cve_id }}</h2>
+        <dl>
+            <div><dt>English description</dt><dd>{{ evidence.description }}</dd></div>
+            <div><dt>Published</dt><dd>{{ evidence.published }}</dd></div>
+            <div><dt>CVSS v{{ evidence.cvss_version }}</dt><dd>{{ evidence.cvss_score }} · {{ evidence.cvss_severity }}</dd></div>
+            <div><dt>Source</dt><dd><a href="{{ evidence.source_url }}">NVD vulnerability record</a></dd></div>
+            <div><dt>Retrieved</dt><dd>{{ evidence.retrieved_at }}</dd></div>
+        </dl>
+        <p class="source-pending">Attribution: National Vulnerability Database (NVD). This source evidence is a review input, not an automatic decision.</p>
+    </article>
+</section>
+{% endif %}
 {% endblock %}

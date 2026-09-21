@@ -5,6 +5,13 @@ import re
 from flask import abort, render_template, request
 
 from models import ITChange
+from services.nvd_service import (
+    NvdConfigurationError,
+    NvdNotFoundError,
+    NvdRateLimitError,
+    NvdService,
+    NvdSourceError,
+)
 
 
 RISK_RANK = {"High": 0, "Medium": 1, "Low": 2}
@@ -87,9 +94,49 @@ def register_routes(app):
                 404,
             )
 
+        evidence = None
+        if review_submitted:
+            try:
+                evidence = NvdService(
+                    app.config.get("NVD_API_KEY"), app.config.get("NVD_API_URL")
+                ).get_cve(cve)
+            except NvdConfigurationError:
+                return render_template(
+                    "external_intelligence_error.html",
+                    heading="NVD API key is not configured",
+                    message="An operator cannot acquire NVD evidence until the application is configured.",
+                    selected_change=selected_change,
+                    cve=cve,
+                ), 503
+            except NvdNotFoundError:
+                return render_template(
+                    "external_intelligence_error.html",
+                    heading="No NVD record found",
+                    message="NVD did not return a record for this CVE Identifier.",
+                    selected_change=selected_change,
+                    cve=cve,
+                ), 404
+            except NvdRateLimitError:
+                return render_template(
+                    "external_intelligence_error.html",
+                    heading="NVD rate limit reached",
+                    message="NVD asked the application to try again later.",
+                    selected_change=selected_change,
+                    cve=cve,
+                ), 429
+            except NvdSourceError:
+                return render_template(
+                    "external_intelligence_error.html",
+                    heading="NVD source unavailable",
+                    message="The application could not acquire NVD evidence right now. Please try again later.",
+                    selected_change=selected_change,
+                    cve=cve,
+                ), 502
+
         return render_template(
             "external_intelligence.html",
             changes=changes,
             selected_change=selected_change,
             cve=cve,
+            evidence=evidence,
         )

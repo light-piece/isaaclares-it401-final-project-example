@@ -9,6 +9,10 @@ class Config:
 
     # External API keys / service config
     API_KEY = os.environ.get("API_KEY")
+    NVD_API_KEY = os.environ.get("NVD_API_KEY")
+    NVD_API_URL = os.environ.get(
+        "NVD_API_URL", "https://services.nvd.nist.gov/rest/json/cves/2.0"
+    )
     AI_SERVICE_API_KEY = os.environ.get("AI_SERVICE_API_KEY")
 
 

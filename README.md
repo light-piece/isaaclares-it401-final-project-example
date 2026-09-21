@@ -14,7 +14,9 @@ InfraRisk Analyzer is a Flask application created by Isaac for IT 401 at CSU Cha
 
 The semester direction is an IT change-risk analysis tool for infrastructure operations. The project is designed to showcase systems thinking for DevOps, system administration, systems engineering, network engineering, and cybersecurity-adjacent roles.
 
-Future assignments can extend the foundation with persistent IT Changes, Risk Findings, Approval Records, Audit Trail events, and AI-generated Risk Summaries that highlight missing review items, mitigation gaps, and rollback concerns.
+Assignment 2 adds authenticated, source-attributed NVD evidence to an External Intelligence Review. An Operator submits a CVE Identifier beside a locally stored IT Change; the application retrieves and normalizes the NVD record without changing the manually assigned Risk Level.
+
+Future assignments can extend the foundation with persistent IT Changes, Risk Findings, Approval Records, Audit Trail events, CISA Known Exploited Vulnerabilities evidence, and AI-generated Risk Summaries that highlight missing review items, mitigation gaps, and rollback concerns.
 
 ## Intended users
 
@@ -35,6 +37,40 @@ Operational changes often fail because teams miss impact, review, or rollback de
 - Dense IT Change cards with Change Ticket, Change Owner, Affected System, Scheduled Window, Review Status, Risk Signals, Mitigation, Rollback Plan, Approval Records, and Audit Trail events
 - Validation that rejects unsupported filter values with an HTTP `400` response
 - Route-level pytest coverage for display, filters, validation, ordering, metadata, disclaimer, and empty results
+
+## External Information Sources
+
+- **NVD CVE API 2.0** — `https://services.nvd.nist.gov/rest/json/cves/2.0`, queried with the Operator's normalized `cveId`. The review uses the CVE identifier, English description, publication date, best available CVSS metric, and NVD source URL.
+- **CISA KEV catalog** — planned for the next A2 integration slice; its public webpage is documented in ADR 0003 and is not yet queried by this route.
+
+NVD attribution is shown in the review. Requests use a finite timeout, the documented API-key header, and a descriptive application User-Agent.
+
+## Application Workflow
+
+1. The Operator selects a locally stored IT Change and enters a CVE Identifier.
+2. The route validates and normalizes the identifier, then sends it as NVD's `cveId` parameter.
+3. The NVD JSON response is reduced to useful evidence fields and shown beside the selected IT Change.
+4. Missing fields and expected source failures become understandable review states; external evidence never mutates local Risk Level or review metadata.
+
+## Environment Variables
+
+`NVD_API_KEY` is required for an acquired NVD review. Copy `.env.example` to `.env` and provide a key from NVD. `.env` is ignored by Git; no real credential belongs in source, tests, logs, or rendered pages.
+
+## Current Features
+
+- Validated External Intelligence Review form for a local IT Change and CVE Identifier
+- Authenticated NVD CVE API 2.0 request and normalized evidence display
+- English description, publication date, best available CVSS version/score/severity, source URL, and retrieval context
+- Friendly handling for missing credentials, empty results, rate limits, unsuccessful responses, malformed JSON, and network failures
+- Existing Change Review Board remains local and manually risk-assigned
+
+## Error Handling
+
+The review returns a configuration state for a missing `NVD_API_KEY`, a not-found state for an empty NVD result, a retry-later state for HTTP 429, and a generic source-unavailable state for other unsuccessful responses, malformed JSON, or network failures. Invalid CVE input is rejected before any outbound request.
+
+## Known Limitations
+
+NVD evidence is request-time context and is not persisted. The application does not infer whether the selected Affected System runs the vulnerable product or version, and External Intelligence does not approve, block, or change an IT Change. CISA KEV enrichment and persistent storage remain future work.
 
 ## Information model
 

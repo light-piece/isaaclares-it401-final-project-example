@@ -7,6 +7,10 @@
     <p class="eyebrow">External Intelligence Review</p>
     <h1>{{ heading }}</h1>
     <p>{{ message }}</p>
+    {% if selected_change %}
+    <p class="context-ticket">{{ selected_change.change_ticket }} · {{ cve }}</p>
+    <p>Selected IT Change: {{ selected_change.title }}</p>
+    {% endif %}
     <a class="button" href="{{ url_for('external_intelligence_review') }}">Return to the review form</a>
 </section>
 {% endblock %}

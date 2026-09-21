@@ -1,4 +1,7 @@
+from unittest.mock import Mock, patch
+
 import pytest
+import requests
 
 from app import create_app
 
@@ -7,6 +10,7 @@ from app import create_app
 def client():
     app = create_app("development")
     app.config["TESTING"] = True
+    app.config["NVD_API_KEY"] = "test-nvd-key"
     with app.test_client() as client:
         yield client
 
@@ -131,20 +135,138 @@ def test_external_intelligence_review_initial_state_lists_local_it_changes(clien
     assert b"Select an IT Change and enter a CVE Identifier" in response.data
 
 
-def test_external_intelligence_review_populated_get_normalizes_and_displays_context(client):
-    response = client.get(
-        "/intelligence?change_ticket=CHG-1042&cve=%20cve-2024-3400%20"
-    )
+def nvd_response(**overrides):
+    cve = {
+        "id": "CVE-2024-3400",
+        "published": "2024-04-12T18:15:00.000",
+        "descriptions": [{
+            "lang": "en",
+            "value": "An OS command injection vulnerability in PAN-OS software.",
+        }],
+        "metrics": {
+            "cvssMetricV31": [{
+                "cvssData": {"baseScore": 10.0, "baseSeverity": "CRITICAL"}
+            }]
+        },
+    }
+    cve.update(overrides)
+    return {"vulnerabilities": [{"cve": cve}]}
+
+
+def test_external_intelligence_review_fetches_and_displays_nvd_evidence(client):
+    response_mock = Mock()
+    response_mock.status_code = 200
+    response_mock.json.return_value = nvd_response()
+    response_mock.raise_for_status.return_value = None
+
+    with patch("services.nvd_service.requests.get", return_value=response_mock) as get:
+        response = client.get(
+            "/intelligence?change_ticket=CHG-1042&cve=%20cve-2024-3400%20"
+        )
 
     assert response.status_code == 200
-    assert b'<option value="CHG-1042" selected>' in response.data
-    assert b'value="CVE-2024-3400"' in response.data
-    assert b"CHG-1042" in response.data
+    get.assert_called_once()
+    assert get.call_args.kwargs["params"] == {"cveId": "CVE-2024-3400"}
+    assert get.call_args.kwargs["headers"]["apiKey"] == "test-nvd-key"
+    assert get.call_args.kwargs["timeout"] == 10
+    assert get.call_args.kwargs["headers"]["User-Agent"].startswith("InfraRisk Analyzer/")
+    assert b"English description" in response.data
+    assert b"An OS command injection vulnerability" in response.data
+    assert b"Published" in response.data
+    assert b"2024-04-12" in response.data
+    assert b"CVSS v3.1" in response.data
+    assert b"10.0" in response.data
+    assert b"CRITICAL" in response.data
+    assert b"NVD" in response.data
+    assert b"https://nvd.nist.gov/vuln/detail/CVE-2024-3400" in response.data
     assert b"Firewall Allow Rule for Vendor Monitoring" in response.data
-    assert b"Firewall" in response.data
-    assert b"Data center edge firewall" in response.data
-    assert b"High" in response.data
-    assert b"Source evidence has not been acquired yet." in response.data
+    assert b"Manually assigned Risk Level" in response.data
+
+
+@pytest.mark.parametrize(
+    "status,heading,body",
+    [
+        (429, b"NVD rate limit reached", b"try again later"),
+        (500, b"NVD source unavailable", b"could not acquire"),
+    ],
+)
+def test_external_intelligence_review_handles_nvd_http_failures(
+    client, status, heading, body
+):
+    response_mock = Mock()
+    response_mock.status_code = status
+    response_mock.raise_for_status.side_effect = requests.HTTPError()
+
+    with patch("services.nvd_service.requests.get", return_value=response_mock):
+        response = client.get(
+            "/intelligence",
+            query_string={"change_ticket": "CHG-1042", "cve": "CVE-2024-3400"},
+        )
+
+    expected_status = 429 if status == 429 else 502
+    assert response.status_code == expected_status
+    assert heading in response.data
+    assert body in response.data
+    assert b"Traceback" not in response.data
+
+
+@pytest.mark.parametrize("failure", [requests.Timeout(), ValueError("bad json")])
+def test_external_intelligence_review_handles_network_and_malformed_json(client, failure):
+    with patch("services.nvd_service.requests.get", side_effect=failure):
+        response = client.get(
+            "/intelligence",
+            query_string={"change_ticket": "CHG-1042", "cve": "CVE-2024-3400"},
+        )
+
+    assert response.status_code == 502
+    assert b"NVD source unavailable" in response.data
+    assert b"Traceback" not in response.data
+
+
+def test_external_intelligence_review_handles_missing_key_without_request(client):
+    client.application.config["NVD_API_KEY"] = None
+
+    with patch("services.nvd_service.requests.get") as get:
+        response = client.get(
+            "/intelligence",
+            query_string={"change_ticket": "CHG-1042", "cve": "CVE-2024-3400"},
+        )
+
+    assert response.status_code == 503
+    assert b"NVD API key is not configured" in response.data
+    get.assert_not_called()
+
+
+def test_external_intelligence_review_handles_empty_nvd_result(client):
+    response_mock = Mock(status_code=200)
+    response_mock.raise_for_status.return_value = None
+    response_mock.json.return_value = {"vulnerabilities": []}
+
+    with patch("services.nvd_service.requests.get", return_value=response_mock):
+        response = client.get(
+            "/intelligence",
+            query_string={"change_ticket": "CHG-1042", "cve": "CVE-2024-3400"},
+        )
+
+    assert response.status_code == 404
+    assert b"No NVD record found" in response.data
+
+
+def test_external_intelligence_review_labels_missing_nvd_fields(client):
+    response_mock = Mock(status_code=200)
+    response_mock.raise_for_status.return_value = None
+    response_mock.json.return_value = {
+        "vulnerabilities": [{"cve": {"id": "CVE-2024-3400", "descriptions": []}}]
+    }
+
+    with patch("services.nvd_service.requests.get", return_value=response_mock):
+        response = client.get(
+            "/intelligence",
+            query_string={"change_ticket": "CHG-1042", "cve": "CVE-2024-3400"},
+        )
+
+    assert response.status_code == 200
+    assert b"Unavailable" in response.data
 
 
 @pytest.mark.parametrize("cve", ["", "2024-3400", "CVE-24-3400", "CVE-2024-ABC"])

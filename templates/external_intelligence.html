@@ -6,7 +6,7 @@
 <header class="page-intro intelligence-intro">
     <p class="eyebrow">External Intelligence Review</p>
     <h1>Relate current vulnerability evidence to an IT Change.</h1>
-    <p>Select an IT Change and enter a CVE Identifier. The application retrieves source-attributed NVD evidence for review.</p>
+    <p>Select an IT Change and enter a CVE Identifier. The application retrieves source-attributed NVD and CISA KEV evidence for review.</p>
 </header>
 
 <section class="intelligence-workspace" aria-labelledby="review-form-title">
@@ -67,6 +67,30 @@
             <div><dt>Retrieved</dt><dd>{{ evidence.retrieved_at }}</dd></div>
         </dl>
         <p class="source-pending">Attribution: National Vulnerability Database (NVD). This source evidence is a review input, not an automatic decision.</p>
+    </article>
+</section>
+
+<section class="intelligence-workspace" aria-labelledby="kev-evidence-title">
+    <article class="intelligence-context">
+        <p class="eyebrow">CISA KEV catalog evidence</p>
+        {% if kev_evidence %}
+        <h2 id="kev-evidence-title">{{ kev_evidence.cve_id }} is listed</h2>
+        <dl>
+            <div><dt>Vendor or project</dt><dd>{{ kev_evidence.vendor_project }}</dd></div>
+            <div><dt>Product</dt><dd>{{ kev_evidence.product }}</dd></div>
+            <div><dt>Vulnerability name</dt><dd>{{ kev_evidence.vulnerability_name }}</dd></div>
+            <div><dt>Date added</dt><dd>{{ kev_evidence.date_added }}</dd></div>
+            <div><dt>Remediation due date</dt><dd>{{ kev_evidence.due_date }}</dd></div>
+            <div><dt>Required action</dt><dd>{{ kev_evidence.required_action }}</dd></div>
+            <div><dt>Source</dt><dd><a href="{{ kev_evidence.source_url }}">CISA Known Exploited Vulnerabilities catalog</a></dd></div>
+            <div><dt>Retrieved</dt><dd>{{ kev_evidence.retrieved_at }}</dd></div>
+        </dl>
+        <p class="source-pending"><strong>Strong Risk Signal:</strong> CISA identifies this CVE as known exploited. Verify that the selected Affected System uses the affected product and version. This evidence is not proof that the system is vulnerable and does not automatically approve or block the IT Change.</p>
+        {% else %}
+        <h2 id="kev-evidence-title">{{ cve }} is not listed in the CISA KEV catalog</h2>
+        <p class="source-pending">CISA returned no exact CVE match. This does not mean the vulnerability is safe or that the selected Affected System is unaffected. Verify the affected product and version directly.</p>
+        <p>Source: <a href="https://www.cisa.gov/known-exploited-vulnerabilities-catalog">CISA Known Exploited Vulnerabilities catalog</a>. The catalog was queried at request time.</p>
+        {% endif %}
     </article>
 </section>
 {% endif %}

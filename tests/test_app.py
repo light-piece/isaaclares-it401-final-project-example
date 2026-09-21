@@ -4,6 +4,7 @@ import pytest
 import requests
 
 from app import create_app
+from services.cisa_kev_service import CisaKevEvidence, CisaKevService
 
 
 @pytest.fixture
@@ -13,6 +14,11 @@ def client():
     app.config["NVD_API_KEY"] = "test-nvd-key"
     with app.test_client() as client:
         yield client
+
+
+@pytest.fixture(autouse=True)
+def cisa_is_offline(monkeypatch):
+    monkeypatch.setattr(CisaKevService, "get_cve", lambda self, cve_id: None)
 
 
 def test_homepage_introduces_infrarisk_analyzer(client):
@@ -181,6 +187,59 @@ def test_external_intelligence_review_fetches_and_displays_nvd_evidence(client):
     assert b"https://nvd.nist.gov/vuln/detail/CVE-2024-3400" in response.data
     assert b"Firewall Allow Rule for Vendor Monitoring" in response.data
     assert b"Manually assigned Risk Level" in response.data
+
+
+def test_external_intelligence_review_combines_exact_cisa_kev_evidence(client, monkeypatch):
+    kev = CisaKevEvidence(
+        cve_id="CVE-2024-3400",
+        vendor_project="Palo Alto Networks",
+        product="PAN-OS",
+        vulnerability_name="PAN-OS command injection",
+        date_added="2024-04-16",
+        due_date="2024-05-06",
+        required_action="Apply vendor mitigations or discontinue use of the product.",
+        source_url="https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+        retrieved_at="2026-09-20T20:00:00+00:00",
+    )
+    monkeypatch.setattr(CisaKevService, "get_cve", lambda self, cve_id: kev)
+
+    response_mock = Mock(status_code=200)
+    response_mock.raise_for_status.return_value = None
+    response_mock.json.return_value = nvd_response()
+    with patch("services.nvd_service.requests.get", return_value=response_mock):
+        response = client.get(
+            "/intelligence",
+            query_string={"change_ticket": "CHG-1042", "cve": " cve-2024-3400 "},
+        )
+
+    assert response.status_code == 200
+    assert b"NVD API evidence" in response.data
+    assert b"CISA KEV catalog evidence" in response.data
+    assert b"Palo Alto Networks" in response.data
+    assert b"PAN-OS command injection" in response.data
+    assert b"2024-05-06" in response.data
+    assert b"Strong Risk Signal" in response.data
+    assert b"not proof that the system is vulnerable" in response.data
+    assert b"Verify that the selected Affected System uses the affected product and version" in response.data
+    assert b"https://www.cisa.gov/known-exploited-vulnerabilities-catalog" in response.data
+
+
+def test_external_intelligence_review_explains_cisa_no_match_without_calling_it_safe(
+    client,
+):
+    response_mock = Mock(status_code=200)
+    response_mock.raise_for_status.return_value = None
+    response_mock.json.return_value = nvd_response()
+    with patch("services.nvd_service.requests.get", return_value=response_mock):
+        response = client.get(
+            "/intelligence",
+            query_string={"change_ticket": "CHG-1042", "cve": "CVE-2024-3400"},
+        )
+
+    assert response.status_code == 200
+    assert b"not listed in the CISA KEV catalog" in response.data
+    assert b"does not mean the vulnerability is safe" in response.data
+    assert b"affected product and version" in response.data
 
 
 @pytest.mark.parametrize(

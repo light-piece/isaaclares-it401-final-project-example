@@ -13,6 +13,10 @@ class Config:
     NVD_API_URL = os.environ.get(
         "NVD_API_URL", "https://services.nvd.nist.gov/rest/json/cves/2.0"
     )
+    CISA_KEV_URL = os.environ.get(
+        "CISA_KEV_URL",
+        "https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+    )
     AI_SERVICE_API_KEY = os.environ.get("AI_SERVICE_API_KEY")
 
 

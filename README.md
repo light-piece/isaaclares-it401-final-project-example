@@ -41,7 +41,7 @@ Operational changes often fail because teams miss impact, review, or rollback de
 ## External Information Sources
 
 - **NVD CVE API 2.0** — `https://services.nvd.nist.gov/rest/json/cves/2.0`, queried with the Operator's normalized `cveId`. The review uses the CVE identifier, English description, publication date, best available CVSS metric, and NVD source URL.
-- **CISA KEV catalog** — planned for the next A2 integration slice; its public webpage is documented in ADR 0003 and is not yet queried by this route.
+- **CISA KEV catalog** — public HTML catalog queried with the normalized CVE Identifier; exact matches are normalized and shown as source-attributed Risk Signals.
 
 NVD attribution is shown in the review. Requests use a finite timeout, the documented API-key header, and a descriptive application User-Agent.
 
@@ -60,6 +60,7 @@ NVD attribution is shown in the review. Requests use a finite timeout, the docum
 
 - Validated External Intelligence Review form for a local IT Change and CVE Identifier
 - Authenticated NVD CVE API 2.0 request and normalized evidence display
+- Request-time CISA KEV HTML acquisition with exact CVE matching and normalized remediation evidence
 - English description, publication date, best available CVSS version/score/severity, source URL, and retrieval context
 - Friendly handling for missing credentials, empty results, rate limits, unsuccessful responses, malformed JSON, and network failures
 - Existing Change Review Board remains local and manually risk-assigned
@@ -70,7 +71,7 @@ The review returns a configuration state for a missing `NVD_API_KEY`, a not-foun
 
 ## Known Limitations
 
-NVD evidence is request-time context and is not persisted. The application does not infer whether the selected Affected System runs the vulnerable product or version, and External Intelligence does not approve, block, or change an IT Change. CISA KEV enrichment and persistent storage remain future work.
+NVD and CISA KEV evidence are request-time context and are not persisted. The application does not infer whether the selected Affected System runs the vulnerable product or version, and External Intelligence does not approve, block, or change an IT Change. Persistent storage remains future work.
 
 ## Information model
 
@@ -151,7 +152,7 @@ docs/submission/             A1 PDF hand-in artifact
 
 ## Future work
 
-Assignment 2 will add an External Intelligence workflow: an Operator enters a CVE Identifier, InfraRisk retrieves NVD vulnerability details, and the application compares them with CISA Known Exploited Vulnerabilities catalog evidence. Assignment 3 can retain timestamped External Intelligence Snapshots with persistent IT Changes, Risk Findings, Approval Records, and Audit Trail events.
+Assignment 2 provides an External Intelligence workflow: an Operator enters a CVE Identifier, InfraRisk retrieves NVD vulnerability details, and the application compares them with CISA Known Exploited Vulnerabilities catalog evidence. Assignment 3 can retain timestamped External Intelligence Snapshots with persistent IT Changes, Risk Findings, Approval Records, and Audit Trail events.
 
 Project terminology and data decisions are documented in [`CONTEXT.md`](CONTEXT.md), [`docs/adr/0002-select-infrarisk-analyzer.md`](docs/adr/0002-select-infrarisk-analyzer.md), and [`docs/adr/0003-use-nvd-and-cisa-kev-for-a2-external-intelligence.md`](docs/adr/0003-use-nvd-and-cisa-kev-for-a2-external-intelligence.md).
 

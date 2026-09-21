@@ -5,6 +5,7 @@ import re
 from flask import abort, render_template, request
 
 from models import ITChange
+from services.cisa_kev_service import CisaKevService, CisaKevSourceError
 from services.nvd_service import (
     NvdConfigurationError,
     NvdNotFoundError,
@@ -133,10 +134,24 @@ def register_routes(app):
                     cve=cve,
                 ), 502
 
+        kev_evidence = None
+        if evidence:
+            try:
+                kev_evidence = CisaKevService(app.config.get("CISA_KEV_URL")).get_cve(cve)
+            except CisaKevSourceError:
+                return render_template(
+                    "external_intelligence_error.html",
+                    heading="CISA KEV source unavailable",
+                    message="The application could not acquire CISA Known Exploited Vulnerabilities evidence right now. Please try again later.",
+                    selected_change=selected_change,
+                    cve=cve,
+                ), 502
+
         return render_template(
             "external_intelligence.html",
             changes=changes,
             selected_change=selected_change,
             cve=cve,
             evidence=evidence,
+            kev_evidence=kev_evidence,
         )

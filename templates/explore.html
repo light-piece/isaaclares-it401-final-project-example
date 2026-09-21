@@ -77,45 +77,43 @@
                 <div><dt>Review status</dt><dd>{{ change.review_status }}</dd></div>
             </dl>
 
-            <section class="card-section card-learning">
-                <h4>What you will learn</h4><p>Identify the change impact, check the affected technology, and prepare a mitigation and rollback conversation.</p>
-            </section>
-            <section class="card-section">
-                <h4>Risk signals</h4>
+            <section class="card-section card-learning"><h4>What you will learn</h4><p>Identify the change impact, check the affected technology, and prepare a mitigation and rollback conversation.</p></section>
+            <details class="card-section card-fold" open>
+                <summary>Risk signals</summary>
                 <ul>
                     {% for signal in change.risk_signals %}
                     <li>{{ signal }}</li>
                     {% endfor %}
                 </ul>
-            </section>
+            </details>
 
-            <section class="card-section">
-                <h4>Mitigation</h4>
+            <details class="card-section card-fold">
+                <summary>Mitigation</summary>
                 <p>{{ change.mitigation }}</p>
-            </section>
+            </details>
 
-            <section class="card-section">
-                <h4>Rollback plan</h4>
+            <details class="card-section card-fold">
+                <summary>Rollback plan</summary>
                 <p>{{ change.rollback_plan }}</p>
-            </section>
+            </details>
 
-            <section class="card-section">
-                <h4>Approval records</h4>
+            <details class="card-section card-fold">
+                <summary>Approval records</summary>
                 <ul class="approval-list">
                     {% for approval in change.approval_records %}
                     <li><span>{{ approval.area }}</span><strong>{{ approval.status }}</strong></li>
                     {% endfor %}
                 </ul>
-            </section>
+            </details>
 
-            <section class="card-section">
-                <h4>Audit trail</h4>
+            <details class="card-section card-fold">
+                <summary>Audit trail</summary>
                 <ol>
                     {% for event in change.audit_trail %}
                     <li>{{ event }}</li>
                     {% endfor %}
                 </ol>
-            </section>
+            </details>
         </article>
         {% endfor %}
     </div>

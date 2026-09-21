@@ -765,6 +765,18 @@ footer p { margin: 0; }
 .home-experience .capabilities article.is-muted { opacity: .35; transform: scale(.98); }
 @media (prefers-reduced-motion: reduce) { .home-experience .capabilities article { transition: none; } }
 
+/* Dense desktop composition: keep the first decision surface visible at 100% zoom. */
+@media (min-width: 861px) {
+    .home-experience .hero { min-height: 390px; padding-bottom: 42px; padding-top: 48px; }
+    .home-experience .hero h1 { font-size: clamp(2.8rem, 5vw, 4.5rem); margin-bottom: 12px; }
+    .home-experience .hero-art { min-height: 210px; }.home-experience .hero-art svg { max-height: 230px; }
+    .home-experience .capabilities { gap: 12px; margin-top: 12px; padding-top: 0; }.home-experience .capabilities article { padding: 17px; }.home-experience .capabilities h2 { font-size: 1.05rem; margin: 8px 0 5px; }.home-experience .capabilities p { font-size: .86rem; line-height: 1.4; }
+    .home-experience .risk-summary { gap: 24px; margin: 14px 0 18px; padding: 22px 28px; }.home-experience .risk-summary h2 { font-size: 1.65rem; margin: 5px 0; }.home-experience .risk-summary > p { font-size: .9rem; margin: 8px 0 0; }
+    .home-experience .learning-callout { margin: 14px 0 36px; padding: 20px 28px; }.home-experience .learning-callout h2 { font-size: 1.45rem; margin: 6px 0; }.home-experience .learning-callout p { font-size: .88rem; margin-bottom: 6px; }
+    .board-experience .page-intro { padding-bottom: 24px; padding-top: 48px; }.board-experience .page-intro h1 { font-size: clamp(2.8rem, 5vw, 4.5rem); margin-bottom: 12px; }.board-experience .review-board { padding-top: 6px; }.board-experience .change-card { padding: 18px; }.board-experience .change-card h3 { font-size: 1.35rem; margin: 13px 0 7px; }.board-experience .metadata-grid { gap: 7px; margin-top: 13px; padding-top: 12px; }.board-experience .card-section { margin-top: 12px; padding-top: 11px; }.board-experience .card-learning { border-top: 0; margin-top: 10px; padding-top: 0; }.board-experience .card-learning p { font-size: .83rem; }
+}
+.card-fold summary { color: #9db6c9; cursor: pointer; font-size: .74rem; font-weight: 850; letter-spacing: .04em; list-style-position: outside; text-transform: uppercase; }.card-fold summary:hover { color: #70e8f2; }.card-fold summary:focus-visible { outline: 2px solid #70e8f2; outline-offset: 3px; }.card-fold[open] summary { color: #70e8f2; margin-bottom: 10px; }
+
 /* Final shared dark visual system: no white surfaces, one type hierarchy. */
 main { color: var(--ink); }
 .site-header { background: var(--paper); }

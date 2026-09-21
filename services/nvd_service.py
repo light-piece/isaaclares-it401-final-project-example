@@ -73,6 +73,33 @@ class NvdService:
 
         return self._normalize(cve)
 
+    def search(self, vendor, product, version="", limit=10):
+        """Find possible CVE matches for user-supplied product context."""
+        if not self.api_key:
+            raise NvdConfigurationError
+        terms = " ".join(part.strip() for part in (vendor, product, version) if part.strip())
+        if not terms:
+            raise NvdNotFoundError
+        try:
+            response = requests.get(
+                self.api_url,
+                params={"keywordSearch": terms, "resultsPerPage": limit},
+                headers={"apiKey": self.api_key, "User-Agent": self.USER_AGENT},
+                timeout=self.timeout,
+            )
+            if response.status_code == 429:
+                raise NvdRateLimitError
+            response.raise_for_status()
+            payload = response.json()
+            vulnerabilities = payload.get("vulnerabilities", [])[:limit]
+            if not vulnerabilities:
+                raise NvdNotFoundError
+            return [self._normalize(item["cve"]) for item in vulnerabilities]
+        except NvdError:
+            raise
+        except (requests.RequestException, ValueError, KeyError, IndexError, TypeError):
+            raise NvdSourceError
+
     @staticmethod
     def _normalize(cve):
         descriptions = cve.get("descriptions", [])

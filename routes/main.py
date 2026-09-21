@@ -184,3 +184,29 @@ def register_routes(app):
             kev_evidence=kev_evidence,
             cisa_available=cisa_available,
         )
+
+    @app.route("/intelligence/discover")
+    def discover_vulnerabilities():
+        data_path = os.path.join(app.config["DATA_DIR"], "it_changes.json")
+        with open(data_path, encoding="utf-8") as data_file:
+            changes = [ITChange.from_dict(item) for item in json.load(data_file)]
+        change_ticket = request.args.get("change_ticket", "")
+        vendor = request.args.get("vendor", "").strip()
+        product = request.args.get("product", "").strip()
+        version = request.args.get("version", "").strip()
+        selected_change = next((change for change in changes if change.change_ticket == change_ticket), None)
+        if selected_change is None:
+            abort(404, description="Choose an IT Change before searching.")
+        if not vendor or not product:
+            return render_template("external_intelligence.html", changes=changes, selected_change=selected_change, cve="", discovery_error="Enter both a vendor and product to search NVD.", vendor=vendor, product=product, version=version), 400
+        try:
+            discovery_results = NvdService(app.config.get("NVD_API_KEY"), app.config.get("NVD_API_URL")).search(vendor, product, version)
+        except NvdConfigurationError:
+            return render_template("external_intelligence.html", changes=changes, selected_change=selected_change, cve="", discovery_error="NVD discovery needs an API key. You can still use a known CVE when the key is configured.", vendor=vendor, product=product, version=version), 503
+        except NvdNotFoundError:
+            discovery_results = []
+        except NvdRateLimitError:
+            return render_template("external_intelligence.html", changes=changes, selected_change=selected_change, cve="", discovery_error="NVD discovery is rate-limited. Try again later or use a known CVE.", vendor=vendor, product=product, version=version), 429
+        except NvdSourceError:
+            return render_template("external_intelligence.html", changes=changes, selected_change=selected_change, cve="", discovery_error="NVD discovery is temporarily unavailable. You can retry or use a known CVE.", vendor=vendor, product=product, version=version), 502
+        return render_template("external_intelligence.html", changes=changes, selected_change=selected_change, cve="", discovery_results=discovery_results, vendor=vendor, product=product, version=version, discovery_terms=" ".join(part for part in (vendor, product, version) if part))

@@ -15,6 +15,15 @@
 </header>
 
 <section class="intelligence-workspace" aria-labelledby="review-form-title">
+    <form class="intelligence-form discovery-form" action="{{ url_for('discover_vulnerabilities') }}" method="get">
+        <div><p class="eyebrow">Find possible matches</p><h2>Search by technology instead of knowing a CVE.</h2><p class="form-footnote">NVD will return possible matches. Verify the product and version before treating one as relevant.</p></div>
+        <input type="hidden" name="change_ticket" value="{{ selected_change.change_ticket if selected_change else '' }}">
+        <label for="vendor">Vendor or project</label><input id="vendor" name="vendor" value="{{ vendor|default('') }}" placeholder="Palo Alto Networks" required>
+        <label for="product">Product</label><input id="product" name="product" value="{{ product|default('') }}" placeholder="PAN-OS" required>
+        <label for="version">Version <span class="label-help">optional</span></label><input id="version" name="version" value="{{ version|default('') }}" placeholder="11.1.2">
+        <button type="submit">Find possible vulnerabilities <span aria-hidden="true">→</span></button>
+        {% if discovery_error %}<p class="source-pending" role="alert">{{ discovery_error }}</p>{% endif %}
+    </form>
     <form class="intelligence-form" action="{{ url_for('external_intelligence_review') }}" method="get">
         <div>
             <p class="eyebrow">Start a review</p>
@@ -66,6 +75,13 @@
     </aside>
     {% endif %}
 </section>
+
+{% if discovery_results is defined %}
+<section class="discovery-results" aria-labelledby="discovery-title">
+    <div class="results-heading"><div><p class="eyebrow">NVD API results</p><h2 id="discovery-title">Possible matches for {{ discovery_terms }}</h2></div><p>{{ discovery_results|length }} result{% if discovery_results|length != 1 %}s{% endif %}</p></div>
+    {% if discovery_results %}<div class="discovery-grid">{% for result in discovery_results %}<article class="discovery-card"><div class="card-topline"><span class="risk-badge">{{ result.cvss_severity }} · {{ result.cvss_score }}</span><span>{{ result.published }}</span></div><h3>{{ result.cve_id }}</h3><p>{{ result.description }}</p><p class="why-match"><strong>Why this appeared:</strong> NVD matched the search terms <strong>{{ discovery_terms }}</strong>. Verify the exact product and version.</p><a class="button" href="{{ url_for('external_intelligence_review', change_ticket=selected_change.change_ticket, cve=result.cve_id) }}">Review evidence →</a></article>{% endfor %}</div>{% else %}<div class="empty-state"><h3>No matching vulnerability records found.</h3><p>Try a broader product name, remove the version, or use the manual CVE lookup above.</p></div>{% endif %}
+</section>
+{% endif %}
 
 {% if evidence %}
 <section class="guided-review evidence-ledger" aria-labelledby="guided-review-title">

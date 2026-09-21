@@ -186,6 +186,32 @@ def test_external_intelligence_review_fetches_and_displays_nvd_evidence(client):
     assert b"NVD" in response.data
 
 
+def test_external_intelligence_discovery_searches_by_product_and_links_to_review(client):
+    response_mock = Mock(status_code=200)
+    response_mock.raise_for_status.return_value = None
+    response_mock.json.return_value = nvd_response()
+
+    with patch("services.nvd_service.requests.get", return_value=response_mock) as get:
+        response = client.get(
+            "/intelligence/discover",
+            query_string={
+                "change_ticket": "CHG-1042",
+                "vendor": "Palo Alto Networks",
+                "product": "PAN-OS",
+                "version": "11.1.2",
+            },
+        )
+
+    assert response.status_code == 200
+    assert get.call_args.kwargs["params"] == {
+        "keywordSearch": "Palo Alto Networks PAN-OS 11.1.2",
+        "resultsPerPage": 10,
+    }
+    assert b"Possible matches for Palo Alto Networks PAN-OS 11.1.2" in response.data
+    assert b"Why this appeared" in response.data
+    assert b"Review evidence" in response.data
+
+
 def test_external_intelligence_review_guides_operator_through_three_questions(client):
     response_mock = Mock(status_code=200)
     response_mock.raise_for_status.return_value = None

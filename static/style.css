@@ -694,6 +694,16 @@ footer p { margin: 0; }
 .practice-cves button { background: #f2f6f8; border: 1px solid #c9d5dd; border-radius: 999px; color: var(--blue); cursor: pointer; font: inherit; font-weight: 800; padding: 5px 9px; }
 .practice-cves button:hover, .practice-cves button:focus-visible { background: #e6f7fa; border-color: #31c6d6; }
 .form-footnote { color: var(--muted); font-size: .76rem; margin: 0; }
+.discovery-form { border-top: 3px solid #58a7ff; }
+.discovery-form h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); }
+.discovery-results { padding: 0 0 70px; position: relative; }
+.discovery-grid { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.discovery-card { background: rgba(18,38,57,.9); border: 1px solid #365875; border-top: 3px solid #58a7ff; border-radius: 10px; box-shadow: var(--shadow); padding: 24px; }
+.discovery-card h3 { color: white; font-family: Georgia, "Times New Roman", serif; font-size: 1.65rem; margin: 15px 0 8px; }
+.discovery-card > p { color: #c3d7e7; }
+.why-match { border-left: 3px solid #70e8f2; font-size: .86rem; padding-left: 12px; }
+.discovery-card .button { background: #70e8f2; color: #091522; margin-top: 8px; }
+.discovery-card .button:hover { background: white; }
 .change-context-card { border-top: 3px solid #31c6d6; }
 .evidence-ledger { position: relative; }
 .evidence-ledger::before { background: linear-gradient(#28ddeb, #d34cec, #ffca4b); content: ""; height: calc(100% - 260px); left: 44px; opacity: .45; position: absolute; top: 240px; width: 1px; }
@@ -709,6 +719,7 @@ footer p { margin: 0; }
     .review-steps { flex-direction: column; }
     .cyber-highway { left: 0; opacity: .22; }
     .evidence-ledger::before, .evidence-card::before { display: none; }
+    .discovery-grid { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
     .cyber-highway i { animation: none; }

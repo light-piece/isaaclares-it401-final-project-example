@@ -21,13 +21,14 @@ NVD supplies the technical vulnerability record. CISA supplies an independent ex
 
 ## Application Workflow
 
-1. The Operator opens **External Intelligence Review**, selects a locally stored IT Change, and enters a CVE Identifier.
-2. The route validates both values before making an external request. CVE input is normalized to uppercase and must match the expected `CVE-YYYY-NNNN...` format.
-3. `NvdService` sends the authenticated JSON request to NVD, checks the status code, and normalizes only fields relevant to the review.
-4. `CisaKevService` retrieves the CISA webpage, cleans table text, matches the exact CVE Identifier, and normalizes the useful catalog fields. A short process-local cache reduces repeated catalog requests.
-5. The selected local IT Change, NVD evidence, and optional CISA evidence are integrated into one page.
-6. Guided questions separate source facts from Operator interpretation: verify applicability, consider the severity or known-exploitation signal, and coordinate mitigation and rollback review.
-7. The page shows source attribution, retrieval timestamps, technical details, and explicit limits. External evidence does not change the IT Change's Risk Level, Review Status, Approval Records, or Audit Trail.
+1. The Operator opens **External Intelligence Review** and selects a locally stored IT Change.
+2. The Operator can search by vendor, product, and optional version. NVD returns possible CVE matches and the interface explains why each result appeared.
+3. The Operator chooses **Review evidence** for one candidate, or uses the secondary exact-CVE lookup when a CVE is already known.
+4. `NvdService` sends the authenticated JSON request to NVD, checks the status code, and normalizes only fields relevant to the review.
+5. `CisaKevService` retrieves the CISA webpage only for the selected CVE, cleans table text, matches the exact identifier, and normalizes the useful catalog fields. A short process-local cache reduces repeated catalog requests.
+6. The selected local IT Change, NVD evidence, and optional CISA evidence are integrated into one page.
+7. Guided questions separate source facts from Operator interpretation: verify applicability, consider the severity or known-exploitation signal, and coordinate mitigation and rollback review.
+8. The page shows source attribution, retrieval timestamps, technical details, and explicit limits. External evidence does not change the IT Change's Risk Level, Review Status, Approval Records, or Audit Trail.
 
 ## Information Model
 
@@ -82,7 +83,9 @@ The tests mock external responses and therefore do not require a network connect
 ## Current Features
 
 - Assignment 1 Change Review Board with local fictional IT Changes, Risk Level filters, review metadata, mitigations, and rollback plans.
-- User-controlled External Intelligence lookup by local Change Ticket and CVE Identifier.
+- User-controlled External Intelligence discovery by local Change Ticket, vendor, product, and optional version.
+- NVD keyword search cards with relevance context, “Why this appeared” explanations, and explicit Review Evidence actions.
+- Secondary exact-CVE lookup for vendor advisories or known vulnerability identifiers.
 - Authenticated NVD JSON API integration with finite timeouts and normalized evidence.
 - CISA KEV public webpage scraping with table-header validation, whitespace cleaning, exact CVE matching, normalized evidence, and process-local caching.
 - One combined review page containing local change context, NVD evidence, CISA evidence, source attribution, retrieval timestamps, and guided interpretation.
@@ -94,6 +97,7 @@ The tests mock external responses and therefore do not require a network connect
 The application presents an understandable state instead of exposing a traceback:
 
 - Invalid CVE input is rejected before an outbound request with a format hint.
+- Invalid discovery input, empty NVD discovery results, and discovery source failures return guided messages without hiding the manual CVE path.
 - An unknown Change Ticket returns a not-found page explaining that the Operator must choose a locally stored IT Change.
 - A missing `NVD_API_KEY` returns a configuration message and HTTP 503.
 - NVD HTTP 429 returns a retry-later message; other unsuccessful responses, network failures, malformed JSON, or missing response fields return a source-unavailable message.

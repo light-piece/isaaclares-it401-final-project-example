@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>InfraRisk Analyzer - Assignment 2</title>
+    <style>
+        @page { size: letter; margin: 0.52in; }
+        @media print { body { zoom: 0.78; } }
+        * { box-sizing: border-box; }
+        body { color: #20242a; font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.4; margin: 0; }
+        h1, h2, h3 { color: #223348; font-family: Georgia, serif; letter-spacing: 0; }
+        h1 { font-size: 32pt; line-height: 1; margin: 0 0 8px; }
+        h2 { font-size: 19pt; margin: 0 0 10px; }
+        h3 { font-size: 12pt; margin: 12px 0 5px; }
+        p { margin: 0 0 8px; }
+        ul, ol { margin: 5px 0 7px; padding-left: 18px; }
+        li { margin-bottom: 3px; }
+        .eyebrow { color: #b97316; font-size: 7.5pt; font-weight: bold; letter-spacing: .14em; text-transform: uppercase; }
+        .tagline { color: #2f6f9f; font-size: 14pt; font-weight: bold; }
+        .meta { border-bottom: 1px solid #d9e0e7; display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 11px; }
+        .notice { background: #fff6e6; border-left: 4px solid #b97316; margin: 12px 0; padding: 8px 11px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 20px; }
+        .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .card { background: #f4f7f9; border: 1px solid #d9e0e7; border-radius: 6px; padding: 9px; }
+        .flow { align-items: center; display: flex; gap: 5px; margin: 12px 0; }
+        .flow span { background: #e8f1f7; border: 1px solid #b7cedd; border-radius: 5px; flex: 1; padding: 8px 5px; text-align: center; }
+        .arrow { background: none !important; border: 0 !important; color: #b97316; flex: 0 0 auto !important; font-size: 15pt; padding: 0 !important; }
+        table { border-collapse: collapse; font-size: 8.5pt; width: 100%; }
+        th, td { border: 1px solid #cbd4dc; padding: 5px; text-align: left; vertical-align: top; }
+        th { background: #223348; color: white; }
+        code { background: #eef2f5; border-radius: 3px; padding: 1px 3px; }
+        .page { break-after: page; }
+        .page:last-child { break-after: auto; }
+        figure { margin: 10px 0 0; }
+        figure img { border: 1px solid #d9e0e7; border-radius: 6px; display: block; max-height: 6.75in; object-fit: contain; object-position: top; width: 100%; }
+        figure.tall img { max-height: 7.25in; }
+        figcaption { color: #626b77; font-size: 8pt; margin-top: 5px; }
+        .small { color: #626b77; font-size: 8.5pt; }
+    </style>
+</head>
+<body>
+    <section class="page">
+        <div class="meta"><strong>IT 401 - Assignment 2</strong><span>Isaac Lares - September 20, 2026</span></div>
+        <p class="eyebrow">External intelligence for IT operations</p>
+        <h1>InfraRisk Analyzer</h1>
+        <p class="tagline">Review infrastructure changes before they become outages.</p>
+        <p>InfraRisk Analyzer extends the Assignment 1 Change Review Board with a request-time External Intelligence Review. An Operator selects a locally stored IT Change and enters a CVE Identifier. The application retrieves technical evidence from the NVD JSON API and an exploitation/remediation signal from the CISA Known Exploited Vulnerabilities catalog.</p>
+        <div class="notice"><strong>Boundary:</strong> External evidence informs human review. It does not prove that the selected Affected System is vulnerable, change the manually assigned Risk Level, approve or block the IT Change, or create a persistent source record.</div>
+        <div class="three">
+            <div class="card"><h3>API source</h3><p>NVD API 2.0 returns the English description, publication date, best CVSS metric, and record URL.</p></div>
+            <div class="card"><h3>Scraped source</h3><p>CISA's public KEV table contributes vendor, product, vulnerability, dates, and required action.</p></div>
+            <div class="card"><h3>Unified purpose</h3><p>Both sources answer what current vulnerability evidence an Operator should consider before a change window.</p></div>
+        </div>
+        <figure><img src="../screenshots/home-desktop.png" alt="InfraRisk Analyzer homepage"><figcaption>Figure 1. Homepage preserves the A1 purpose and directs the Operator to Change Risk review.</figcaption></figure>
+    </section>
+
+    <section class="page">
+        <p class="eyebrow">Acquisition and integration workflow</p>
+        <h2>One review, two external evidence boundaries</h2>
+        <div class="flow"><span>Operator selects Change Ticket + enters CVE</span><b class="arrow">→</b><span>Validate and normalize input</span><b class="arrow">→</b><span>NVD authenticated JSON request</span><b class="arrow">→</b><span>CISA catalog HTML request</span></div>
+        <div class="flow"><span>Extract relevant JSON fields</span><b class="arrow">→</b><span>Parse, clean, exact-match table row</span><b class="arrow">→</b><span>Combine evidence with local IT Change</span><b class="arrow">→</b><span>Guided human interpretation</span></div>
+        <h3>Source and environment contract</h3>
+        <table>
+            <tr><th>Source</th><th>Endpoint / fields</th><th>Purpose and boundary</th></tr>
+            <tr><td>NVD API 2.0</td><td><code>https://services.nvd.nist.gov/rest/json/cves/2.0</code><br>English description, published, CVSS, NVD URL</td><td>Technical vulnerability record; uses <code>NVD_API_KEY</code>, a normalized <code>cveId</code>, User-Agent, and a finite timeout.</td></tr>
+            <tr><td>CISA KEV catalog</td><td><code>https://www.cisa.gov/known-exploited-vulnerabilities-catalog</code><br>Vendor/project, product, name, dates, required action</td><td>Public webpage scrape; exact CVE match only. Fifteen-minute process-local cache reduces repeat requests.</td></tr>
+        </table>
+        <p class="small">Environment variables: <code>NVD_API_KEY</code> is required for NVD; <code>NVD_API_URL</code>, <code>CISA_KEV_URL</code>, and <code>SECRET_KEY</code> are optional overrides/configuration. A placeholder-only <code>.env.example</code> is committed; real <code>.env</code> is ignored.</p>
+        <h3>Information model</h3>
+        <div class="grid"><div class="card"><strong>Local IT Change</strong><br>title, Change Type, Risk Level, Affected System, window, Risk Signals, Mitigation, Rollback Plan, Change Owner, Change Ticket, Review Status, Approval Records, Audit Trail.</div><div class="card"><strong>Request-time evidence</strong><br><strong>NVD:</strong> CVE Identifier, description, published, CVSS, source URL, retrieval time.<br><strong>CISA:</strong> CVE Identifier, vendor/project, product, vulnerability name, dates, required action, source URL, retrieval time.</div></div>
+    </section>
+
+    <section class="page">
+        <p class="eyebrow">Verified integrated interface</p>
+        <h2>External Intelligence Review</h2>
+        <p>The selected Change Ticket remains visible beside both source panels. Guided questions separate source facts from Operator interpretation and preserve the local manually assigned Risk Level.</p>
+        <figure class="tall"><img src="../screenshots/external-intelligence-desktop.png" alt="Combined External Intelligence Review with NVD and CISA evidence"><figcaption>Figure 2. Combined desktop state: selected IT Change, NVD API evidence, CISA KEV catalog evidence, source details, and guided interpretation. Labels make API, scraped, and integrated requirements explicit.</figcaption></figure>
+    </section>
+
+    <section class="page">
+        <p class="eyebrow">Reliability and tested behavior</p>
+        <h2>Failure-handling matrix</h2>
+        <table>
+            <tr><th>Condition</th><th>Behavior</th><th>Test evidence</th></tr>
+            <tr><td>Invalid CVE or unknown Change Ticket</td><td>Rejects before acquisition with a plain-language 400/404 page; no outbound request for invalid CVE.</td><td>Route parametrized tests.</td></tr>
+            <tr><td>Missing NVD key</td><td>503 configuration message; NVD request is not called.</td><td><code>test...missing_key...</code></td></tr>
+            <tr><td>NVD failure, rate limit, network, malformed JSON</td><td>502 source-unavailable message, or 429 retry-later message; no traceback.</td><td>HTTP, timeout, and JSON tests.</td></tr>
+            <tr><td>Empty NVD result</td><td>404 “No NVD record found” message.</td><td>Empty-result route test.</td></tr>
+            <tr><td>Changed/missing CISA markup or network failure</td><td>503 partial state preserves NVD evidence and says CISA listing status cannot be determined.</td><td>Scraper malformed-row/header and partial-result tests.</td></tr>
+            <tr><td>CISA exact-match miss</td><td>Displays “not listed in this catalog snapshot”; never claims safe or non-exposed.</td><td>No-match route test.</td></tr>
+        </table>
+        <h3>Verification record</h3>
+        <ul><li>Automated suite: <strong>41 passed</strong> with mocked sources; no live network or real credential required.</li><li>Production routes verified in the checked-in screenshots: homepage, Change Review Board, External Intelligence Review, source details, guided questions, and narrow responsive layout.</li><li>Reduced-motion behavior is implemented in <code>static/style.css</code>; JavaScript enhancement keeps all answers available without scripting.</li><li>Repository scan: no tracked API key, token, password, local environment file, or secret-bearing config; only placeholder <code>.env.example</code>.</li><li>Manual authenticated NVD live-source verification is intentionally not claimed in this artifact because this environment has no real NVD credential. It is the remaining operator-only release step after configuring a private local <code>.env</code>.</li></ul>
+    </section>
+
+    <section class="page">
+        <p class="eyebrow">Reflection and next steps</p>
+        <h2>Ethics, limitations, and Assignment 3</h2>
+        <div class="grid">
+            <div><h3>Ethical considerations</h3><ul><li>Attributes NVD and CISA and links to their source records.</li><li>Uses the documented NVD endpoint, API key header, descriptive User-Agent, finite timeout, and respectful request frequency.</li><li>Scrapes only public CISA table fields needed for review; respects source terms, licensing, robots guidance, and layout changes.</li><li>Does not collect personal information or infer compromise from a CVE match.</li></ul></div>
+            <div><h3>Known limitations</h3><ul><li>Evidence is request-time and process-local CISA caching is lost on restart.</li><li>External schemas, availability, rate limits, and HTML layout can change.</li><li>A CVE does not establish that the selected system uses the affected product/version.</li><li>Demonstration data is not a production approval system.</li></ul></div>
+        </div>
+        <h3>Assignment 3 direction</h3>
+        <p>Add persistent IT Changes, Risk Findings, Approval Records, Audit Trail events, and timestamped External Intelligence Snapshots. A snapshot will retain the normalized NVD/CISA evidence, source URLs, retrieval timestamps, selected Change Ticket, and Operator review context without turning external evidence into automatic approval or blocking logic.</p>
+        <h3>Release checklist</h3>
+        <p class="small">The repository contains the A1 PDF unchanged plus this versioned A2 PDF, updated README sections, focused service and route tests, source fixtures, and checked-in browser screenshots. The final local steps are <code>.venv/bin/python -m pytest -q</code>, a private-key live NVD check, and a final secret scan before submission.</p>
+    </section>
+</body>
+</html>

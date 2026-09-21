@@ -696,6 +696,13 @@ footer p { margin: 0; }
 .form-footnote { color: var(--muted); font-size: .76rem; margin: 0; }
 .discovery-form { border-top: 3px solid #58a7ff; }
 .discovery-form h2 { font-size: clamp(1.7rem, 3vw, 2.4rem); }
+.discovery-workspace { align-items: stretch; display: grid; gap: 18px; grid-template-columns: minmax(300px, .8fr) minmax(0, 1.2fr); padding: 0 0 34px; }
+.discovery-side { min-width: 0; padding: clamp(25px, 4vw, 38px); }
+.discovery-side .results-heading { align-items: start; margin: 0 0 18px; }
+.discovery-side .results-heading h2 { font-size: clamp(1.5rem, 3vw, 2.2rem); }
+.discovery-placeholder { align-content: center; background: rgba(18,38,57,.86); border: 1px dashed #426681; border-radius: 10px; color: var(--muted); display: grid; min-height: 100%; padding: clamp(25px, 4vw, 38px); }
+.discovery-placeholder h2 { color: var(--ink); font-family: Georgia, "Times New Roman", serif; line-height: 1.1; margin: 8px 0 12px; }
+.discovery-placeholder .eyebrow { color: #6de8f1; }
 .discovery-results { padding: 0 0 70px; position: relative; }
 .discovery-grid { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .discovery-card { background: rgba(18,38,57,.9); border: 1px solid #365875; border-top: 3px solid #58a7ff; border-radius: 10px; box-shadow: var(--shadow); padding: 24px; }
@@ -720,6 +727,7 @@ footer p { margin: 0; }
     .cyber-highway { left: 0; opacity: .22; }
     .evidence-ledger::before, .evidence-card::before { display: none; }
     .discovery-grid { grid-template-columns: 1fr; }
+    .discovery-workspace { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
     .cyber-highway i { animation: none; }

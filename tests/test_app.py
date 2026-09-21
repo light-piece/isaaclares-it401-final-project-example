@@ -184,6 +184,52 @@ def test_external_intelligence_review_fetches_and_displays_nvd_evidence(client):
     assert b"10.0" in response.data
     assert b"CRITICAL" in response.data
     assert b"NVD" in response.data
+
+
+def test_external_intelligence_review_guides_operator_through_three_questions(client):
+    response_mock = Mock(status_code=200)
+    response_mock.raise_for_status.return_value = None
+    response_mock.json.return_value = nvd_response()
+
+    with patch("services.nvd_service.requests.get", return_value=response_mock):
+        response = client.get(
+            "/intelligence",
+            query_string={"change_ticket": "CHG-1042", "cve": "CVE-2024-3400"},
+        )
+
+    assert response.status_code == 200
+    assert b"Is this system affected?" in response.data
+    assert b"How serious is it?" in response.data
+    assert b"What should I do?" in response.data
+    assert b'aria-pressed="true"' in response.data
+    assert b"Source fact" in response.data
+    assert b"Operator interpretation" in response.data
+    assert b"Technical source details" in response.data
+    assert b"If JavaScript is unavailable" in response.data
+
+
+def test_external_intelligence_review_can_select_a_guiding_question_without_new_acquisition(
+    client,
+):
+    response_mock = Mock(status_code=200)
+    response_mock.raise_for_status.return_value = None
+    response_mock.json.return_value = nvd_response()
+
+    with patch("services.nvd_service.requests.get", return_value=response_mock) as get:
+        response = client.get(
+            "/intelligence",
+            query_string={
+                "change_ticket": "CHG-1042",
+                "cve": "CVE-2024-3400",
+                "question": "action",
+            },
+        )
+
+    assert response.status_code == 200
+    assert get.call_count == 1
+    assert b'data-question="action"' in response.data
+    assert b'aria-controls="answer-action" aria-pressed="true"' in response.data
+    assert b'id="answer-action"' in response.data
     assert b"https://nvd.nist.gov/vuln/detail/CVE-2024-3400" in response.data
     assert b"Firewall Allow Rule for Vendor Monitoring" in response.data
     assert b"Manually assigned Risk Level" in response.data

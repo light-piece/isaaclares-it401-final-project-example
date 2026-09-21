@@ -17,6 +17,7 @@ from services.nvd_service import (
 
 RISK_RANK = {"High": 0, "Medium": 1, "Low": 2}
 CHANGE_TYPES = ("Firewall", "DNS", "Access", "Patching", "Deployment", "Server Config")
+REVIEW_QUESTIONS = ("affected", "serious", "action")
 
 
 def register_routes(app):
@@ -69,6 +70,9 @@ def register_routes(app):
 
         change_ticket = request.args.get("change_ticket", "")
         cve = request.args.get("cve", "").strip().upper()
+        question = request.args.get("question", "affected")
+        if question not in REVIEW_QUESTIONS:
+            question = "affected"
         review_submitted = "change_ticket" in request.args or "cve" in request.args
 
         if review_submitted and not re.fullmatch(r"CVE-\d{4}-\d{4,7}", cve):
@@ -147,6 +151,7 @@ def register_routes(app):
                         changes=changes,
                         selected_change=selected_change,
                         cve=cve,
+                        question=question,
                         evidence=evidence,
                         kev_evidence=None,
                         cisa_available=cisa_available,
@@ -160,6 +165,7 @@ def register_routes(app):
             changes=changes,
             selected_change=selected_change,
             cve=cve,
+            question=question,
             evidence=evidence,
             kev_evidence=kev_evidence,
             cisa_available=cisa_available,

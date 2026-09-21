@@ -55,17 +55,59 @@
 </section>
 
 {% if evidence %}
+<section class="guided-review" aria-labelledby="guided-review-title">
+    <div class="guided-review-heading">
+        <p class="eyebrow">Guided interpretation</p>
+        <h2 id="guided-review-title">Start with the question that matters to your review</h2>
+        <p>These answers separate source facts from the Operator's judgment. InfraRisk Analyzer does not confirm exposure, change the Risk Level, or approve the IT Change.</p>
+    </div>
+
+    <div class="question-controls" role="group" aria-label="External Intelligence Review questions">
+        {% for question_id, question_label in [("affected", "Is this system affected?"), ("serious", "How serious is it?"), ("action", "What should I do?")] %}
+        <button type="button" class="question-control{% if question == question_id %} is-selected{% endif %}" data-question="{{ question_id }}" aria-controls="answer-{{ question_id }}" aria-pressed="{{ 'true' if question == question_id else 'false' }}">
+            <span class="question-number">0{{ loop.index }}</span>
+            <span>{{ question_label }}</span>
+        </button>
+        {% endfor %}
+    </div>
+
+    <div class="guided-answers">
+        <article id="answer-affected" class="guided-answer{% if question == 'affected' %} is-active{% endif %}" data-answer="affected" aria-hidden="{{ 'false' if question == 'affected' else 'true' }}">
+            <p class="answer-kicker">Question 01 · Is this system affected?</p>
+            <h3>Evidence does not establish exposure by itself.</h3>
+            <p><strong>Source fact:</strong> NVD describes <strong>{{ evidence.cve_id }}</strong> as “{{ evidence.description }}”{% if kev_evidence %}; CISA also lists that identifier as a Known Exploited Vulnerability affecting {{ kev_evidence.vendor_project }} {{ kev_evidence.product }}{% endif %}.</p>
+            <p><strong>Operator interpretation:</strong> Verify that <strong>{{ selected_change.affected_system }}</strong> uses the affected product and version before treating this as evidence about the selected IT Change.</p>
+        </article>
+        <article id="answer-serious" class="guided-answer{% if question == 'serious' %} is-active{% endif %}" data-answer="serious" aria-hidden="{{ 'false' if question == 'serious' else 'true' }}">
+            <p class="answer-kicker">Question 02 · How serious is it?</p>
+            <h3>{{ 'CISA marks this CVE as known exploited.' if kev_evidence else 'NVD provides a technical severity signal.' }}</h3>
+            <p><strong>Source fact:</strong> NVD reports CVSS {{ evidence.cvss_version }} {{ evidence.cvss_score }} / {{ evidence.cvss_severity }}.{% if kev_evidence %} CISA identifies the CVE as known exploited and provides a remediation due date of {{ kev_evidence.due_date }}.{% endif %}</p>
+            <p><strong>Operator interpretation:</strong> Use these signals to prioritize human review alongside the IT Change's manually assigned <strong>{{ selected_change.risk_level }} Risk Level</strong>; they are not an automatic decision.</p>
+        </article>
+        <article id="answer-action" class="guided-answer{% if question == 'action' %} is-active{% endif %}" data-answer="action" aria-hidden="{{ 'false' if question == 'action' else 'true' }}">
+            <p class="answer-kicker">Question 03 · What should I do?</p>
+            <h3>Confirm applicability, then coordinate mitigation before the window.</h3>
+            <p><strong>Source fact:</strong> {% if kev_evidence %}CISA's required action is: {{ kev_evidence.required_action }}{% else %}CISA listing status is unavailable or no exact match was found; no CISA action should be inferred.{% endif %}</p>
+            <p><strong>Operator interpretation:</strong> Compare the evidence with the Rollback Plan and coordinate the appropriate human reviewers. Do not approve, block, or alter this IT Change based on this page alone.</p>
+        </article>
+    </div>
+    <p class="no-script-note">If JavaScript is unavailable, all three questions and their answers remain available below. Technical source details are grouped after the plain-language interpretation.</p>
+</section>
+
 <section class="intelligence-workspace" aria-labelledby="nvd-evidence-title">
     <article class="intelligence-context">
         <p class="eyebrow">NVD API evidence</p>
         <h2 id="nvd-evidence-title">{{ evidence.cve_id }}</h2>
-        <dl>
+        <details class="source-details">
+            <summary>Technical source details</summary>
+            <dl>
             <div><dt>English description</dt><dd>{{ evidence.description }}</dd></div>
             <div><dt>Published</dt><dd>{{ evidence.published }}</dd></div>
             <div><dt>CVSS v{{ evidence.cvss_version }}</dt><dd>{{ evidence.cvss_score }} · {{ evidence.cvss_severity }}</dd></div>
             <div><dt>Source</dt><dd><a href="{{ evidence.source_url }}">NVD vulnerability record</a></dd></div>
             <div><dt>Retrieved</dt><dd>{{ evidence.retrieved_at }}</dd></div>
-        </dl>
+            </dl>
+        </details>
         <p class="source-pending">Attribution: National Vulnerability Database (NVD). This source evidence is a review input, not an automatic decision.</p>
     </article>
 </section>
@@ -75,7 +117,9 @@
         <p class="eyebrow">CISA KEV catalog evidence</p>
         {% if kev_evidence %}
         <h2 id="kev-evidence-title">{{ kev_evidence.cve_id }} is listed</h2>
-        <dl>
+        <details class="source-details">
+            <summary>Technical source details</summary>
+            <dl>
             <div><dt>Vendor or project</dt><dd>{{ kev_evidence.vendor_project }}</dd></div>
             <div><dt>Product</dt><dd>{{ kev_evidence.product }}</dd></div>
             <div><dt>Vulnerability name</dt><dd>{{ kev_evidence.vulnerability_name }}</dd></div>
@@ -84,7 +128,8 @@
             <div><dt>Required action</dt><dd>{{ kev_evidence.required_action }}</dd></div>
             <div><dt>Source</dt><dd><a href="{{ kev_evidence.source_url }}">CISA Known Exploited Vulnerabilities catalog</a></dd></div>
             <div><dt>Retrieved</dt><dd>{{ kev_evidence.retrieved_at }}</dd></div>
-        </dl>
+            </dl>
+        </details>
         <p class="source-pending"><strong>Strong Risk Signal:</strong> CISA identifies this CVE as known exploited. Verify that the selected Affected System uses the affected product and version. This evidence is not proof that the system is vulnerable and does not automatically approve or block the IT Change.</p>
         {% else %}
         {% if not cisa_available %}
@@ -101,4 +146,24 @@
     </article>
 </section>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelectorAll(".question-control").forEach((control) => {
+        control.addEventListener("click", () => {
+            const selected = control.dataset.question;
+            document.querySelectorAll(".question-control").forEach((item) => {
+                const isSelected = item === control;
+                item.classList.toggle("is-selected", isSelected);
+                item.setAttribute("aria-pressed", String(isSelected));
+            });
+            document.querySelectorAll(".guided-answer").forEach((answer) => {
+                const isSelected = answer.dataset.answer === selected;
+                answer.setAttribute("aria-hidden", String(!isSelected));
+                answer.classList.toggle("is-active", isSelected);
+            });
+        });
+    });
+</script>
 {% endblock %}

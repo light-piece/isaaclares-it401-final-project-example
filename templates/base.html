@@ -7,7 +7,7 @@
     <title>{% block title %}InfraRisk Analyzer{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-<body>
+<body class="no-js">
     <header class="site-header">
         <a class="brand" href="{{ url_for('index') }}" aria-label="InfraRisk Analyzer home">
             <svg class="brand-mark" viewBox="0 0 64 64" role="img" aria-labelledby="logo-title">
@@ -29,9 +29,14 @@
 
     <main>{% block content %}{% endblock %}</main>
 
+    {% block scripts %}{% endblock %}
+
     <footer>
         <p>Created by Isaac Lares for IT 401 at CSU Channel Islands.</p>
         <p>Demonstration data, not a production change-management or approval system.</p>
     </footer>
+    <script>
+        document.body.classList.replace("no-js", "js");
+    </script>
 </body>
 </html>
